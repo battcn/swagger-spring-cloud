@@ -13,6 +13,9 @@ import org.springframework.web.client.RestTemplate;
 import springfox.documentation.swagger.web.SwaggerResource;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * @author Levin
@@ -40,10 +43,22 @@ public class SwaggerController {
         for (String serviceId : services) {
             CloudSwaggerResource resource = new CloudSwaggerResource();
             List<ServiceInstance> instances = discoveryClient.getInstances(serviceId);
-            List<SwaggerResource> swaggerResources = this.restTemplate.getForObject("http://" + serviceId + "/swagger-resources", List.class);
-            resource.setServiceInstances(instances);
-            resource.setSwaggerResources(swaggerResources);
-            list.add(resource);
+            if (CollectionUtils.isEmpty(instances)) {
+                continue;
+            }
+            for (ServiceInstance service : instances) {
+                List<SwaggerResource> swaggerResources = this.restTemplate.getForObject("http://" + service.getServiceId() + "/swagger-resources", List.class);
+                swaggerResources = swaggerResources.stream().map(rs -> {
+                    SwaggerResource swaggerResource = new SwaggerResource();
+                    swaggerResource.setName(rs.getName());
+                    swaggerResource.setLocation(service.getUri() + "" + rs.getLocation());
+                    swaggerResource.setSwaggerVersion(rs.getSwaggerVersion());
+                    return swaggerResource;
+                }).collect(toList());
+                resource.setServiceInstances(instances);
+                resource.setSwaggerResources(swaggerResources);
+                list.add(resource);
+            }
         }
         return list;
     }

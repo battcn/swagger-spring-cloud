@@ -7,7 +7,12 @@
             dataType: "json",
             type: "get",
             async: false,
-            success: function (data) {
+            success: function (resource) {
+                var data = null;
+                if (resource.swaggerResources !== null) {
+                    data = resource[0].swaggerResources;
+                }
+                console.info(data);
                 DApiUI.dli = $('<select class="form-control"></select>');
                 DApiUI.dli.on("change", '', function () {
                     DApiUI.paging(data);
@@ -771,11 +776,13 @@
                         var curlUrl = "\'" + contentUrl + this.url + "\'";
                         if (this.type.toLowerCase() === "get") {
                             var curltable = ("curl -X " + this.type + " --header \'Accept:  " + apiInfo.consumes[0] + "\' " +
-                                headerss + curlUrl);/* .replace(/[\r\n]/g, "") */
+                            headerss + curlUrl);
+                            /* .replace(/[\r\n]/g, "") */
                         } else {
                             /* d data 非头部附带数据,只用于非get类型请求 */
-                            var curlData = " -d \'" + (this.data?this.data.replace(/[\r\n]/g," \\\n"):"")  + "\' ";
-                            var curltable = ("curl -X " + this.type + contentType + curlAccept + headerss + curlData + curlUrl);/* .replace(/[\r\n]/g, "") */
+                            var curlData = " -d \'" + (this.data ? this.data.replace(/[\r\n]/g, " \\\n") : "") + "\' ";
+                            var curltable = ("curl -X " + this.type + contentType + curlAccept + headerss + curlData + curlUrl);
+                            /* .replace(/[\r\n]/g, "") */
                         }
                         //设置curl内容
                         resp4.find(".panel-body").html("");
@@ -878,8 +885,9 @@
                             var curltable = ("curl -X " + this.type + " --header \'Accept:  " + apiInfo.consumes[0] + "\' " + headerss + curlUrl);
                         } else {
                             /* d data 非头部附带数据,只用于非get类型请求 */
-                            var curlData = " -d \'" + (this.data?this.data.replace(/[\r\n]/g," \\\n"):"")  + "\' ";
-                            var curltable = ("curl -X " + this.type + contentType + curlAccept + headerss + curlData + curlUrl);/* .replace(/[\r\n]/g, "") */
+                            var curlData = " -d \'" + (this.data ? this.data.replace(/[\r\n]/g, " \\\n") : "") + "\' ";
+                            var curltable = ("curl -X " + this.type + contentType + curlAccept + headerss + curlData + curlUrl);
+                            /* .replace(/[\r\n]/g, "") */
                         }
                         //设置curl内容
                         resp4.find(".panel-body").html("");
