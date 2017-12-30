@@ -7,6 +7,7 @@
     <groupId>com.battcn</groupId>
     <artifactId>spring-cloud-swagger</artifactId>
     <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
     <!-- SNAPSHOT RELEASE -->
 
     <name>spring-boot-starter-swagger</name>
@@ -18,8 +19,10 @@
         <url>http://blog.battcn.com</url>
     </organization>
 
-    <modules>./spring-cloud-swagger-client</modules>
-    <modules>./spring-cloud-swagger-server</modules>
+    <modules>
+        <module>spring-cloud-swagger-client</module>
+        <module>spring-cloud-swagger-server</module>
+    </modules>
 
 
     <licenses>
