@@ -22,6 +22,7 @@
     <modules>
         <module>spring-cloud-swagger-client</module>
         <module>spring-cloud-swagger-server</module>
+        <module>spring-cloud-swagger-samples</module>
     </modules>
 
 

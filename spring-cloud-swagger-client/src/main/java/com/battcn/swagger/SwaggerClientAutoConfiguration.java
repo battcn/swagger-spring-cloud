@@ -44,7 +44,7 @@ import static java.util.stream.Collectors.toSet;
         Swagger2DocumentationConfiguration.class,
         BeanValidatorPluginsConfiguration.class
 })
-public class SwaggerAutoConfiguration implements BeanFactoryAware {
+public class SwaggerClientAutoConfiguration implements BeanFactoryAware {
 
     private static final String DEFAULT_GROUP_NAME = "default";
     private static final String BASE_PATH = "/**";
