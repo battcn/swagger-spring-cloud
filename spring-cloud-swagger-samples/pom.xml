@@ -12,7 +12,10 @@
     <modules>
         <module>spring-cloud-swagger-sample-eureka</module>
         <module>spring-cloud-swagger-sample-service1</module>
+        <module>spring-cloud-swagger-sample-service2</module>
+        <module>spring-cloud-swagger-sample-service3</module>
     </modules>
+    <name>spring-cloud-swagger-samples</name>
     <artifactId>spring-cloud-swagger-samples</artifactId>
     <version>1.0.0-SNAPSHOT</version>
 
