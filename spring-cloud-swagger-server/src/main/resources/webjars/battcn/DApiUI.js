@@ -3,7 +3,7 @@
     var DApiUI = {};
     DApiUI.init = function () {
         $.ajax({
-            url: "swagger-resources",
+            url: "cloud-swagger-resources",
             dataType: "json",
             type: "get",
             async: false,

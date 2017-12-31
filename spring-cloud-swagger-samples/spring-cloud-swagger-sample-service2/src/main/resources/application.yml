@@ -12,6 +12,8 @@ spring:
       preferred-networks:
         - 192.168
         - 10.0
+  swagger:
+    base-package: com.battcn
 eureka:
   instance:
     hostname: localhost 	#配置主机名
