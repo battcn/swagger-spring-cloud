@@ -1,8 +1,9 @@
 package com.battcn.swagger.controller;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.battcn.swagger.model.CloudSwaggerResource;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
@@ -17,7 +18,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 import springfox.documentation.swagger.web.SwaggerResource;
 
@@ -33,11 +33,13 @@ public class SwaggerController {
 
     private final RestTemplate restTemplate;
     private final DiscoveryClient discoveryClient;
+    private final ObjectMapper objectMapper;
 
     @Autowired
-    public SwaggerController(DiscoveryClient discoveryClient, RestTemplate restTemplate) {
+    public SwaggerController(DiscoveryClient discoveryClient, RestTemplate restTemplate, ObjectMapper objectMapper) {
         this.restTemplate = restTemplate;
         this.discoveryClient = discoveryClient;
+        this.objectMapper = objectMapper;
     }
 
     @GetMapping(value = "/cloud-swagger-resources", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
@@ -54,11 +56,16 @@ public class SwaggerController {
                 continue;
             }
             for (ServiceInstance service : instances) {
-                log.info(JSON.toJSONString(service));
-                JSONObject object = JSON.parseObject(JSON.toJSONString(service));
-                JSONObject instanceInfo = object.getJSONObject("instanceInfo");
-                String status = instanceInfo.getString("status");
-                if (!StringUtils.equalsIgnoreCase(status, "UP")) {
+                try {
+                    String serviceInfo = objectMapper.writeValueAsString(service);
+                    JsonNode node = objectMapper.readValue(serviceInfo, JsonNode.class);
+                    JsonNode instanceInfo = node.get("instanceInfo");
+                    String status = instanceInfo.get("status").asText();
+                    if (!StringUtils.equalsIgnoreCase(status, "UP")) {
+                        continue;
+                    }
+                } catch (java.io.IOException e) {
+                    log.error("[错误信息] - [{}]", e.getMessage());
                     continue;
                 }
                 List<SwaggerResource> swaggerResourceArrayList = Lists.newArrayList();
@@ -68,7 +75,7 @@ public class SwaggerController {
                         continue;
                     }
                     String body = responseEntity.getBody();
-                    List<SwaggerResource> swaggerResources = JSON.parseArray(body, SwaggerResource.class);
+                    List<SwaggerResource> swaggerResources = objectMapper.readValue(body, new TypeReference<List<SwaggerResource>>() {});
                     for (SwaggerResource swaggerResource : swaggerResources) {
                         swaggerResource.setName(swaggerResource.getName());
                         swaggerResource.setLocation(service.getUri() + swaggerResource.getLocation());
@@ -84,7 +91,7 @@ public class SwaggerController {
                     if (ex instanceof java.net.ConnectException || ex instanceof org.springframework.web.client.ResourceAccessException) {
                         log.error("[{}] - [服务DOWN] - [已跳过]", serviceId);
                     } else {
-                        log.error("[{}] - [{}]", ex);
+                        log.error("[错误信息] - [{}]", ex);
                     }
                 }
             }
