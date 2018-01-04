@@ -98,6 +98,4 @@ public class SwaggerController {
         }
         return list;
     }
-
-
 }
