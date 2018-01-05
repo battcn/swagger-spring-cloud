@@ -1,5 +1,6 @@
 package com.battcn.swagger.controller;
 
+import com.battcn.swagger.constant.SwaggerConstant;
 import com.battcn.swagger.model.CloudSwaggerResource;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -57,25 +58,33 @@ public class SwaggerController {
             }
             for (ServiceInstance service : instances) {
                 try {
-                    String serviceInfo = objectMapper.writeValueAsString(service);
-                    JsonNode node = objectMapper.readValue(serviceInfo, JsonNode.class);
-                    JsonNode instanceInfo = node.get("instanceInfo");
-                    String status = instanceInfo.get("status").asText();
+                    if (log.isDebugEnabled()) {
+                        String serviceInfo = objectMapper.writeValueAsString(service);
+                        log.debug("[服务实例信息] - [{}]", serviceInfo);
+                    }
+                    ResponseEntity<String> health = exchange(SwaggerConstant.HEALTH_URL, serviceId);
+                    String body = health.getBody();
+                    if (log.isDebugEnabled()) {
+                        log.debug("[服务] - [{}] - [响应内容] - [{}]", serviceId, body);
+                    }
+                    JsonNode healthInfo = objectMapper.readValue(body, JsonNode.class);
+                    String status = healthInfo.get("status").asText();
                     if (!StringUtils.equalsIgnoreCase(status, "UP")) {
                         continue;
                     }
-                } catch (java.io.IOException e) {
+                } catch (Exception e) {
                     log.error("[错误信息] - [{}]", e.getMessage());
                     continue;
                 }
                 List<SwaggerResource> swaggerResourceArrayList = Lists.newArrayList();
                 try {
-                    ResponseEntity<String> responseEntity = this.restTemplate.exchange("http://" + serviceId + "/swagger-resources", HttpMethod.GET, null, String.class);
+                    ResponseEntity<String> responseEntity = exchange(SwaggerConstant.SWAGGER_RESOURCES_URL, serviceId);
                     if (responseEntity == null || responseEntity.getStatusCode() != HttpStatus.OK) {
                         continue;
                     }
                     String body = responseEntity.getBody();
-                    List<SwaggerResource> swaggerResources = objectMapper.readValue(body, new TypeReference<List<SwaggerResource>>() {});
+                    List<SwaggerResource> swaggerResources = objectMapper.readValue(body, new TypeReference<List<SwaggerResource>>() {
+                    });
                     for (SwaggerResource swaggerResource : swaggerResources) {
                         swaggerResource.setName(swaggerResource.getName());
                         swaggerResource.setLocation(service.getUri() + swaggerResource.getLocation());
@@ -86,10 +95,10 @@ public class SwaggerController {
                     cloudSwaggerResource.setSwaggerResources(swaggerResourceArrayList);
                     list.add(cloudSwaggerResource);
                 } catch (HttpClientErrorException e1) {
-                    log.error("[{}] - [404] - [已跳过]", serviceId);
+                    log.error("[{}] - [请求服务404] - [已跳过]", serviceId);
                 } catch (Exception ex) {
                     if (ex instanceof java.net.ConnectException || ex instanceof org.springframework.web.client.ResourceAccessException) {
-                        log.error("[{}] - [服务DOWN] - [已跳过]", serviceId);
+                        log.error("[{}] - [请求服务DOWN] - [已跳过]", serviceId);
                     } else {
                         log.error("[错误信息] - [{}]", ex);
                     }
@@ -98,4 +107,10 @@ public class SwaggerController {
         }
         return list;
     }
+
+    private ResponseEntity<String> exchange(String url, String serviceId) {
+        log.info(String.format(url, serviceId));
+        return this.restTemplate.exchange(String.format(url, serviceId), HttpMethod.GET, null, String.class);
+    }
+
 }

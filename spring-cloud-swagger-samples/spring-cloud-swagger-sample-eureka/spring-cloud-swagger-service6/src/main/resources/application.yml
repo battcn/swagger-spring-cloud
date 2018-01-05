@@ -1,0 +1,27 @@
+server:
+  port: 8801
+
+spring:
+  application:
+    name: spring-cloud-swagger-service1
+  cloud:
+    inetutils:
+      ignored-interfaces:
+        - docker0
+        - veth.*
+      preferred-networks:
+        - 192.168
+        - 10.0
+  swagger:
+    base-package: com.battcn
+eureka:
+  instance:
+    hostname: localhost 	#配置主机名
+  client:
+    service-url:
+      defaultZone: http://${eureka.instance.hostname}:8761/eureka/
+      #配置eureka客户端的缺省域(该配置可能没有提示,请复制或者手动输入,切勿使用有提示的service-url会引起内置tomcat报错)
+
+management:
+  security:
+    enabled: false
