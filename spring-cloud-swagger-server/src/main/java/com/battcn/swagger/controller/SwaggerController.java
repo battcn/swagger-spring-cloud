@@ -67,7 +67,9 @@ public class SwaggerController {
                             response = new ServiceResponse(exchange, service);
                         }
                         return response;
-                    }).filter(Objects::nonNull).collect(toList());
+                    })
+                    .filter(Objects::nonNull)
+                    .collect(toList());
 
             for (ServiceResponse response : serviceResponses) {
                 try {
