@@ -5,9 +5,7 @@ import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 
 /**
@@ -15,7 +13,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
  */
 @Configuration
 @ComponentScan("com.battcn.swagger.controller")
-public class SwaggerServerAutoConfiguration extends WebMvcConfigurerAdapter {
+public class SwaggerServerAutoConfiguration {
 
 
     @Bean

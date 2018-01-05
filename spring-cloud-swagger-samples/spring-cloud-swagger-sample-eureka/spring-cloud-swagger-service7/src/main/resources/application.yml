@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: spring-cloud-swagger-service2
+    name: spring-cloud-swagger-service7
   cloud:
     inetutils:
       ignored-interfaces:
