@@ -1,7 +1,7 @@
 package com.battcn.swagger.controller;
 
-import com.battcn.swagger.constant.SwaggerConstant;
 import com.battcn.swagger.model.CloudSwaggerResource;
+import com.battcn.swagger.model.ServiceResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,10 +11,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,7 +19,12 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import springfox.documentation.swagger.web.SwaggerResource;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
+
+import static com.battcn.swagger.constant.SwaggerConstant.*;
+import static java.util.stream.Collectors.toList;
 
 /**
  * @author Levin
@@ -44,7 +46,7 @@ public class SwaggerController {
     }
 
     @GetMapping(value = "/cloud-swagger-resources", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public List<CloudSwaggerResource> test() {
+    public List<CloudSwaggerResource> getDocumentation() {
         List<CloudSwaggerResource> list = Lists.newArrayList();
         List<String> services = discoveryClient.getServices();
         if (CollectionUtils.isEmpty(services)) {
@@ -56,61 +58,88 @@ public class SwaggerController {
             if (CollectionUtils.isEmpty(instances)) {
                 continue;
             }
-            for (ServiceInstance service : instances) {
+            List<ServiceResponse> serviceResponses = instances.stream()
+                    .filter(this::checkHealth)
+                    .map(service -> {
+                        ServiceResponse response = null;
+                        ResponseEntity<String> exchange = exchange(SWAGGER_RESOURCES_URL, serviceId);
+                        if (exchange != null) {
+                            response = new ServiceResponse(exchange, service);
+                        }
+                        return response;
+                    }).filter(Objects::nonNull).collect(toList());
+
+            for (ServiceResponse response : serviceResponses) {
                 try {
-                    if (log.isDebugEnabled()) {
-                        String serviceInfo = objectMapper.writeValueAsString(service);
-                        log.debug("[服务实例信息] - [{}]", serviceInfo);
-                    }
-                    ResponseEntity<String> health = exchange(SwaggerConstant.HEALTH_URL, serviceId);
-                    String body = health.getBody();
-                    if (log.isDebugEnabled()) {
-                        log.debug("[服务] - [{}] - [响应内容] - [{}]", serviceId, body);
-                    }
-                    JsonNode healthInfo = objectMapper.readValue(body, JsonNode.class);
-                    String status = healthInfo.get("status").asText();
-                    if (!StringUtils.equalsIgnoreCase(status, "UP")) {
-                        continue;
-                    }
-                } catch (Exception e) {
-                    log.error("[错误信息] - [{}]", e.getMessage());
-                    continue;
-                }
-                List<SwaggerResource> swaggerResourceArrayList = Lists.newArrayList();
-                try {
-                    ResponseEntity<String> responseEntity = exchange(SwaggerConstant.SWAGGER_RESOURCES_URL, serviceId);
-                    if (responseEntity == null || responseEntity.getStatusCode() != HttpStatus.OK) {
-                        continue;
-                    }
-                    String body = responseEntity.getBody();
+                    List<SwaggerResource> swaggerResourceArrayList = Lists.newArrayList();
+                    String body = response.getResponse().getBody();
                     List<SwaggerResource> swaggerResources = objectMapper.readValue(body, new TypeReference<List<SwaggerResource>>() {
                     });
                     for (SwaggerResource swaggerResource : swaggerResources) {
                         swaggerResource.setName(swaggerResource.getName());
-                        swaggerResource.setLocation(service.getUri() + swaggerResource.getLocation());
+                        swaggerResource.setLocation(response.getServiceInstance().getUri() + swaggerResource.getLocation());
                         swaggerResource.setSwaggerVersion(swaggerResource.getSwaggerVersion());
                         swaggerResourceArrayList.add(swaggerResource);
                     }
                     cloudSwaggerResource.setServiceInstances(instances);
                     cloudSwaggerResource.setSwaggerResources(swaggerResourceArrayList);
                     list.add(cloudSwaggerResource);
-                } catch (HttpClientErrorException e1) {
-                    log.error("[{}] - [请求服务404] - [已跳过]", serviceId);
-                } catch (Exception ex) {
-                    if (ex instanceof java.net.ConnectException || ex instanceof org.springframework.web.client.ResourceAccessException) {
-                        log.error("[{}] - [请求服务DOWN] - [已跳过]", serviceId);
-                    } else {
-                        log.error("[错误信息] - [{}]", ex);
-                    }
+                } catch (IOException ex) {
+                    log.error("[JSON转换错误] - [{}]", ex);
                 }
             }
         }
         return list;
     }
 
+    /**
+     * 检查服务是否健壮
+     *
+     * @param service 服务信息
+     * @return 检查结果
+     */
+    private boolean checkHealth(ServiceInstance service) {
+        try {
+            String serviceId = service.getServiceId();
+            if (log.isDebugEnabled()) {
+                String serviceInfo = objectMapper.writeValueAsString(service);
+                log.debug("[服务实例信息] - [{}]", serviceInfo);
+            }
+            ResponseEntity<String> health = exchange(HEALTH_URL, serviceId);
+            String body = health.getBody();
+            if (log.isDebugEnabled()) {
+                log.debug("[服务] - [{}] - [响应内容] - [{}]", serviceId, body);
+            }
+            JsonNode healthInfo = objectMapper.readValue(body, JsonNode.class);
+            String status = healthInfo.get(STATUS).asText();
+            return StringUtils.equalsIgnoreCase(status, UP);
+        } catch (Exception e) {
+            log.error("[错误信息] - [{}]", e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * 发送 HTTP 请求,包装了 restTemplate.exchange();
+     *
+     * @param url       请求地址
+     * @param serviceId 服务ID
+     * @return 请求结果
+     */
     private ResponseEntity<String> exchange(String url, String serviceId) {
-        log.info(String.format(url, serviceId));
-        return this.restTemplate.exchange(String.format(url, serviceId), HttpMethod.GET, null, String.class);
+        ResponseEntity<String> result = null;
+        try {
+            result = this.restTemplate.exchange(String.format(url, serviceId), HttpMethod.GET, null, String.class);
+        } catch (HttpClientErrorException e1) {
+            log.error("[{}] - [请求服务404] - [已跳过]", serviceId);
+        } catch (Exception ex) {
+            if (ex instanceof org.springframework.web.client.ResourceAccessException) {
+                log.error("[{}] - [请求服务DOWN] - [已跳过]", serviceId);
+            } else {
+                log.error("[错误信息] - [{}]", ex);
+            }
+        }
+        return result;
     }
 
 }

@@ -10,6 +10,10 @@ public class SwaggerConstant {
 
     public final static String HEALTH_URL = "http://%s/health";
 
+    public final static String STATUS = "status";
+
+    public final static String UP = "UP";
+
     public final static String SWAGGER_RESOURCES_URL = "http://%s/swagger-resources";
 
 }
