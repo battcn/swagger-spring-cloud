@@ -3,7 +3,6 @@ package com.battcn.swagger.smaple;
 import com.battcn.swagger.annotation.EnableSwaggerClient;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.cors.CorsConfiguration;
@@ -34,7 +33,6 @@ public class Application6 {
     }
 
     @Bean
-    @ConditionalOnMissingBean
     public CorsFilter corsFilter() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration(PATH, buildConfig());
