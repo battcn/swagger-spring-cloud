@@ -20,7 +20,6 @@
         <li class="categoryLi" v-for="(item,index) in bycdaoCategory" @click="countTo=index" :style="{backgroundColor:bg[item[1].toUpperCase()]}" >
           <span class="categoryLi-type">{{item[1].toUpperCase()}}</span>
           <span class="categoryLi-name">{{item[2].summary}}</span>
-          <!--<span>{{item[1]}}<br>{{item[2].summary}}</span>-->
         </li>
       </ul>
     </div>

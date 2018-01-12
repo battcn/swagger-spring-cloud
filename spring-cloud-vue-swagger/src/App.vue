@@ -5,6 +5,7 @@
   </div>
 </template>
 
+
 <script type="text/ecmascript-6">
   import 'normalize.css'
   import 'font-awesome/css/font-awesome.css'

@@ -27,7 +27,7 @@ function init() {
     dropDown.state.data="请求失败:"+responese;
     return false;
   }).then(function (a) {
-    if(a){
+    if(a&&dropDown.state.data[dropDown.state.count].swaggerResources[0]&&dropDown.state.data[dropDown.state.count].swaggerResources[0].location){
       /* dropDown.state.data[0]控制当前是第几个接口 */
       // bycdaoLeftContent.state.data=dropDown.state.data[0].swaggerResources[0]
       Vue.http.get(dropDown.state.data[dropDown.state.count].swaggerResources[0].location).then((responese)=>{
@@ -41,12 +41,21 @@ function init() {
   });
 }
 init();
-
+/* 调试模块 */
+const debugRequest={
+  state:{data:[],count:0},
+  mutations:{
+    send(state,n){
+       
+    }
+  }
+}
 
 export default new Vuex.Store({
   modules:{
     bycdaoLeftHead:dropDown,
-    bycdaoLeftContent:bycdaoLeftContent
+    bycdaoLeftContent:bycdaoLeftContent,
+    debugRequest:debugRequest
   }
 })
 
