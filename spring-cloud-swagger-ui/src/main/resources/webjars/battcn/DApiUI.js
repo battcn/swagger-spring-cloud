@@ -1,18 +1,17 @@
 (function ($) {
     //初始化类
     var DApiUI = {};
-    DApiUI.init = function () {
+    DApiUI.init = function (){
         $.ajax({
             url: "cloud-swagger-resources",
             dataType: "json",
             type: "get",
             async: false,
-            success: function (resource) {
+            success: function(resource){
                 var data = null;
                 if (resource.swaggerResources !== null) {
                     data = resource[0].swaggerResources;
                 }
-                console.info(data);
                 DApiUI.dli = $('<select class="form-control"></select>');
                 DApiUI.dli.on("change", '', function () {
                     DApiUI.paging(data);
