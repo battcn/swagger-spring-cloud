@@ -1,10 +1,9 @@
 package com.battcn.swagger.smaple.controller;
 
+import com.battcn.swagger.smaple.entity.School;
+import com.battcn.swagger.smaple.entity.Student;
 import io.swagger.annotations.Api;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @author Levin
@@ -18,12 +17,26 @@ public class SchoolController {
 
     @GetMapping
     public String get() {
-        return "{name:\"battcn\"}";
+        return "{name:\"school\"}";
     }
 
     @PostMapping
-    public int add() {
-        return 200;
+    public School post(School school) {
+        return school;
+    }
+
+    @PutMapping
+    public School put(School school) {
+        return school;
+    }
+
+    @DeleteMapping
+    public int delete(@PathVariable("id") Integer id) {
+        return id;
+    }
+    @PatchMapping
+    public int patch(@PathVariable("id") Integer id) {
+        return id;
     }
 
 }

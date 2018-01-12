@@ -1,17 +1,9 @@
 package com.battcn.swagger.smaple.controller;
 
+import com.battcn.swagger.smaple.entity.Student;
 import io.swagger.annotations.Api;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.discovery.DiscoveryClient;
-import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import springfox.documentation.swagger.web.SwaggerResource;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 /**
  * @author Levin
@@ -22,31 +14,27 @@ import java.util.List;
 @Api(tags = "1.1", description = "学生管理")
 public class StudentController {
 
-    private final DiscoveryClient discoveryClient;
-
-    @Autowired
-    public StudentController(DiscoveryClient discoveryClient) {
-        this.discoveryClient = discoveryClient;
-    }
-
     @GetMapping
-    public String getStudent() {
-        List<String> services = discoveryClient.getServices();
-        List<ServiceInstance> instances1 = discoveryClient.getInstances("spring-cloud-swagger-service2");
-        System.out.println(instances1.size());
-        if (CollectionUtils.isEmpty(services)) {
-            return null;
-        }
-        SwaggerResource resource = new SwaggerResource();
-        for (String serviceId : services) {
-            List<ServiceInstance> instances = discoveryClient.getInstances(serviceId);
-        }
+    public String get() {
         return "{name:\"battcn\"}";
     }
 
     @PostMapping
-    public int addStudent() {
-        return 200;
+    public Student post(Student student) {
+        return student;
     }
 
+    @PutMapping
+    public Student put(Student student) {
+        return student;
+    }
+
+    @DeleteMapping
+    public int delete(@PathVariable("id") Integer id) {
+        return id;
+    }
+    @PatchMapping
+    public int patch(@PathVariable("id") Integer id) {
+        return id;
+    }
 }
