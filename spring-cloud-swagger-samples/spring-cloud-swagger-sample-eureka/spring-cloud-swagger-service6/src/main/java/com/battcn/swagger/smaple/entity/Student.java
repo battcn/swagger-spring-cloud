@@ -12,6 +12,7 @@ public class Student {
 
     @ApiModelProperty(value = "编号",required = true)
     private int id;
+    @ApiModelProperty(value = "名称",required = true)
     private String name;
     private Long[] clazz;
 
