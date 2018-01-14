@@ -5,13 +5,14 @@ import io.swagger.annotations.ApiModelProperty;
 
 /**
  * @author Levin
- * @create 2018/1/12 0012
+ * @since  2018/1/12 0012
  */
 @ApiModel
 public class Student {
 
-    @ApiModelProperty("编号")
+    @ApiModelProperty(value = "编号",required = true)
     private int id;
+    @ApiModelProperty(value = "名称",required = true)
     private String name;
     private Long[] clazz;
 
