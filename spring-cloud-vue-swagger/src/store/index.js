@@ -43,10 +43,15 @@ function init() {
 init();
 /* 调试模块 */
 const debugRequest={
-  state:{data:[],count:0},
+  state:{data:[],count:0,debugResponse:{}},
   mutations:{
     send(state,n){
-       
+      Vue.http.get(n.url,n.data,{method:n.type,headers:n.headerParams})
+        .then((response) =>{
+          debugRequest.state.data=response;
+        },(response)=>{
+          debugRequest.state.data=response;
+        })
     }
   }
 }

@@ -62,7 +62,7 @@
              * 对name一致的进行保存
               * */
             if (count == this.bycdaoLeftContent.tags[this.count].name) {
-              current.push([i, n, this.$store.state.bycdaoLeftContent.data.paths[i][n]]);
+              current.push([i, n, this.$store.state.bycdaoLeftContent.data.paths[i][n],this.$store.state.bycdaoLeftContent.data]);
             }
           }
         }

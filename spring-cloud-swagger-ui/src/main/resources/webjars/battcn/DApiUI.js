@@ -660,6 +660,7 @@
 
             var reqdata = null;
             var contType = "application/json; charset=UTF-8";
+            console.log(paramBody.attr("reqtype"))
             if (paramBody.attr("reqtype") !== null && paramBody.attr("reqtype") !== undefined && paramBody.attr("reqtype") === "body") {
                 reqdata = bodyparams;
             } else {
@@ -781,7 +782,6 @@
                             /* d data 非头部附带数据,只用于非get类型请求 */
                             var curlData = " -d \'" + (this.data ? this.data.replace(/[\r\n]/g, " \\\n") : "") + "\' ";
                             var curltable = ("curl -X " + this.type + contentType + curlAccept + headerss + curlData + curlUrl);
-                            /* .replace(/[\r\n]/g, "") */
                         }
                         //设置curl内容
                         resp4.find(".panel-body").html("");
