@@ -1,8 +1,9 @@
 package com.battcn.swagger.smaple.controller;
 
 import com.battcn.swagger.smaple.entity.School;
-import com.battcn.swagger.smaple.entity.Student;
 import io.swagger.annotations.Api;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -14,28 +15,36 @@ import org.springframework.web.bind.annotation.*;
 @Api(tags = "1.2", description = "学校管理")
 public class SchoolController {
 
+    private static final Logger logger = LoggerFactory.getLogger(SchoolController.class);
+
 
     @GetMapping
     public String get() {
+        logger.info("schools get ");
         return "{name:\"school\"}";
     }
 
     @PostMapping
     public School post(School school) {
+        logger.info("schools post ");
         return school;
     }
 
     @PutMapping
     public School put(School school) {
+        logger.info("schools put ");
         return school;
     }
 
     @DeleteMapping
     public int delete(@PathVariable("id") Integer id) {
+        logger.info("schools delete {}", id);
         return id;
     }
+
     @PatchMapping
     public int patch(@PathVariable("id") Integer id) {
+        logger.info("schools patch {}", id);
         return id;
     }
 
