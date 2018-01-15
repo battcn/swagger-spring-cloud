@@ -20,14 +20,14 @@ const  bycdaoLeftContent={
 }
 /* 初始化:获取单选框数据， */
 function init() {
-  let a=Vue.http.get('http://localhost:8803/cloud-swagger-resources').then((responese)=>{
+  Vue.http.get('http://localhost:8803/cloud-swagger-resources').then((responese)=>{
     dropDown.state.data=responese.body;
     return true;
   },(responese)=>{
     dropDown.state.data="请求失败:"+responese;
     return false;
-  }).then(function (a) {
-    if(a&&dropDown.state.data[dropDown.state.count].swaggerResources[0]&&dropDown.state.data[dropDown.state.count].swaggerResources[0].location){
+  }).then((a)=> {
+    if(a&&dropDown.state.data[dropDown.state.count].swaggerResources&&dropDown.state.data[dropDown.state.count].swaggerResources[0]&&dropDown.state.data[dropDown.state.count].swaggerResources[0].location){
       /* dropDown.state.data[0]控制当前是第几个接口 */
       // bycdaoLeftContent.state.data=dropDown.state.data[0].swaggerResources[0]
       Vue.http.get(dropDown.state.data[dropDown.state.count].swaggerResources[0].location).then((responese)=>{
@@ -38,7 +38,7 @@ function init() {
         return false;
       })
     }
-  });
+  })
 }
 init();
 /* 调试模块 */
@@ -47,10 +47,10 @@ const debugRequest={
   mutations:{
     send(state,n){
       Vue.http.get(n.url,n.data,{method:n.type,headers:n.headerParams})
-        .then((response) =>{
-          debugRequest.state.data=response;
-        },(response)=>{
-          debugRequest.state.data=response;
+        .then(function (responese){
+          debugRequest.state.debugResponse=responese;
+        },function (responese){
+          debugRequest.state.debugResponse=responese;
         })
     }
   }

@@ -75,10 +75,10 @@
             <span style="border-right: 7px solid transparent;">参数值</span>
             <span>操作</span>
           </li>
-          <li class="parameter-content"  v-for="(item,index) in bycdaoCategory[countTo][2].parameters" >
+          <li class="parameter-content" v-for="(item,index) in bycdaoCategory[countTo][2].parameters">
             <input style="margin-top:10px;" @click="" class="parameter-checkbox" type="checkbox"
                    :checked="item.required==true||selectAll"/>
-            <input :value="item.name"  class="parameter-name" type="text"/>
+            <input :value="item.name" class="parameter-name" type="text"/>
             <input class="parameter-value" type="text"/>
             <span class="parameter-operating">删除</span>
           </li>
@@ -94,18 +94,33 @@
         <span style="cursor:pointer;" @click="debugging='curl'" :class="[debugging=='curl'?'active':'']">curl方式</span>
         <div class="result-content">
           <div v-show="debugging=='content'">
-            <h1>aaaaa</h1>
-            {
-            <ul>
-              <span>{{debugResponse}}</span>
-              <!--<li v-for="(item,index) in debugResponse"><span>{{debugResponse}}</span></li>-->
-
+            <ul v-if="(typeof debugResponse.bodyText)=='object'">
+              <li v-for="item in debugResponse.bodyText">
+                <span>{{item}}</span>
+              </li>
             </ul>
-            }
+            <li v-else>
+              <span>{{debugResponse.bodyText}}</span>
+            </li>
           </div>
-          <div v-show="debugging=='cookies'"></div>
-          <div v-show="debugging=='header'"></div>
-          <div v-show="debugging=='curl'"></div>
+          <div v-show="debugging=='cookies'">
+            <span>暂无</span>
+          </div>
+          <div class="debugging-header" v-show="debugging=='header'">
+            <ul style="border: 1px solid #ddd;">
+              <li class="head"><span>请求头</span><span>value</span></li>
+              <li><span>date</span><span></span></li>
+              <li><span>transfer-encoding</span><span></span></li>
+              <li><span>x-application-context</span><span></span></li>
+              <li><span>content-type</span><span>{{debugResponse&&debugResponse.headers&&debugResponse.headers['map']&&debugResponse.headers['map']['content-type']&&debugResponse.headers['map']['content-type'][0]}}</span></li>
+              <li><span>response-code</span><span>{{debugResponse&&debugResponse.status}}</span></li>
+            </ul>
+          </div>
+          <div class="debugging-curl" v-show="debugging=='curl'">
+            <div>
+              {{curlMode}}
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -118,16 +133,24 @@
   export default {
     name: "app",
     data() {
-      return {switchA: 0, debugging: 'content', selectAll: false}
+      return {switchA: 0, debugging: 'content', selectAll: false, curlMode: ""}
     },
-    computed:{
-      debugResponse(){
-        return this.$store.state.debugRequest.data;
+    computed: {
+      debugResponse() {
+        //   console.log("???",JSON.stringify(this.$store.state.debugRequest.debugResponse.bodyText))
+        return this.$store.state.debugRequest.debugResponse;
+      }
+    },
+    watch:{
+      countTo:function () {
+        this.curlMode="";
+        this.switchA=0;
+        this.selectAll=false;
       }
     },
     methods: {
       getForm: function () {
-        var _this=this;
+        var _this = this;
         var result = [];
         var parameterContent = document.getElementsByClassName("parameter-content");
         for (var i = 0, n = parameterContent.length; i < n; i++) {
@@ -142,19 +165,19 @@
         }
         _this.stitchUrl(result);
       },
-      stitchUrl:function (result) {
-        let _this=this;
-        let url=(_this.bycdaoCategory[0]&&_this.bycdaoCategory[0][0])?_this.bycdaoCategory[0][0]:'',
+      stitchUrl: function (result) {
+        let _this = this;
+        let url = (_this.bycdaoCategory[0] && _this.bycdaoCategory[0][0]) ? _this.bycdaoCategory[0][0] : '',
           params = {},
-          headerParams="",
-          reqdata="",
+          headerParams = "",
+          reqdata = "",
           bodyparams = "";
         if (typeof (_this.bycdaoCategory[0][3].basePath) !== "undefined" && _this.bycdaoCategory[0][3].basePath !== "") {
           if (_this.bycdaoCategory[0][3].basePath !== "/") {
             url = _this.bycdaoCategory[0][3].basePath + url;
           }
         }
-        for(let i=0,n=result.length;i<n;i++){
+        for (let i = 0, n = result.length; i < n; i++) {
           if (_this.bycdaoCategory[0][2]["in"] === "path") {
             url = url.replace("{" + result[i][0] + "}", result[i][1]);
           } else {
@@ -170,31 +193,53 @@
           }
         }
         reqdata = params;
-        this.$store.commit('send', {url:"http://"+_this.bycdaoCategory[0][3].host+url,
-          headerParams:headerParams,
-          type:_this.bycdaoCategory[this.countTo][1],
-          data:reqdata});
-           // this.debugResponse=this.$store.state.debugRequest.data;
+        let jsonReqdata = JSON.stringify(reqdata)
+        this.$store.commit('send', {
+          url: "http://" + _this.bycdaoCategory[0][3].host + url,
+          headerParams: headerParams,
+          type: _this.bycdaoCategory[this.countTo][1],
+          data: reqdata
+        });
+        // this.debugResponse=this.$store.state.debugRequest.data;
         /* 冰洁curl口令 */
-        _this.StitchingCurl(headerParams);
+        setTimeout(() => {
+          _this.StitchingCurl(headerParams, jsonReqdata);
+        }, 1000);
       },
-      StitchingCurl:function (headerParams) {
-        let _this=this;
+      StitchingCurl: function (headerParams, reqdata) {
+        let _this = this;
         let headerss = "";
-        let contentUrl=_this.debugResponse.url
-        console.log(_this.debugResponse.url)
+        let contentUrl = "\'" + _this.debugResponse.url + "\'";
+        let curlAccept = " --header \'Accept:  " + _this.debugResponse.headers['map']['content-type'][0] + "\' ";
         for (let key in headerParams) {
           headerss += (key + ": " + headerParams[key]);
         }
         /*  生成curl命令组成部分 */
         /* 头部数据 */
         headerss != "" ? headerss = " --header \'" + headerss + "\' " : "";
-
+        let contentType = " --header \'Content-Type:  " + _this.debugResponse.headers['map']['content-type'][0] + "\' "
+        if (_this.bycdaoCategory[this.countTo][1].toLowerCase() == 'get') {
+          let curltable = ("curl -X " + _this.bycdaoCategory[this.countTo][1] +
+            " --header \'Accept:  " + _this.debugResponse.headers['map']['content-type'][0] + "\' " +
+            headerss + contentUrl);
+          _this.curlMode = curltable;
+          console.log(curltable)
+        } else {
+          /* d data 非头部附带数据,只用于非get类型请求 */
+          let curlData = " -d \'";
+          for (let i in JSON.parse(reqdata)) {
+            curlData += i + "=" + JSON.parse(reqdata)[i] + "&";
+          }
+          curlData = curlData.slice(0, curlData.length - 1);
+          curlData += "\' ";
+          let curltable = ("curl -X " + _this.bycdaoCategory[this.countTo][1] + contentType + curlAccept + headerss + curlData + contentUrl);
+          _this.curlMode = curltable;
+        }
       },
       ...mapMutations(['send']),
     },
     props: ['bycdaoCategory', 'countTo'],
-    components: {statusCode},
+    components: {statusCode}
   }
 </script>
 <style>
@@ -224,6 +269,14 @@
     border-bottom: 1px solid #FFFFFF;
   }
 
+  .debugging-curl > div {
+    color: #393939;
+    font-size: 13px;
+    white-space: nowrap;
+    overflow-x: auto;
+    padding: 15px;
+  }
+
   .result-content {
     border-top: 1px solid #EBEBEB;
     padding-top: 40px;
@@ -231,8 +284,37 @@
 
   .result-content > div {
     border: 1px solid #ddd;
-    min-height: 250px;
+    min-height: 210px;
     font-size: 16px;
+    text-align: left;
+    padding: 40px 15px 15px;
+  }
+
+  .debugging-header > ul {
+    border: 1px solid #ddd;
+  }
+
+  .debugging-header li {
+    border-bottom: 1px solid #ddd;
+  }
+
+  .debugging-header li > span {
+    padding: 10px 15px 10px 5px;
+    display: inline-block;
+  }
+
+  .debugging-header li > span:first-child {
+    font-weight: 700;
+    width: 38%;
+    border-right: 1px solid #ddd;
+  }
+
+  .debugging-header li > span:last-child {
+    width: 45%;
+  }
+
+  .debugging-header .head {
+    font-weight: 700;
   }
 
   /* 请求参数表格 */
