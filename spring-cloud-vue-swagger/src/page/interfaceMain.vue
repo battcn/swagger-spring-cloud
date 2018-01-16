@@ -2,7 +2,7 @@
   <div class="bycdao-main">
     <div class="switch">
       <span style="cursor:pointer;" @click="switchA=0" :class="[switchA==0?'active':'']">接口说明</span>
-      <span style="cursor:pointer;" @click="switchA=1" :class="[switchA==1?'active':'']">在线调试</span>
+      <span style="cursor:pointer;"  @click="traverseRequired" :class="[switchA==1?'active':'']">在线调试</span>
     </div>
     <div v-show="switchA==0" style="" class="bycdao-content">
       <ul class="content-list" style="">
@@ -70,21 +70,21 @@
       <div class="content-parameter" v-if="bycdaoCategory[countTo]&&bycdaoCategory[countTo][2].parameters">
         <ul>
           <li class="parameter-head">
-            <input style="margin-top:10px;" type="checkbox" @click="selectAll=!selectAll"/>
+            <input style="margin-top:10px;" type="checkbox" @click="selectAll"/>
             <span>参数名称</span>
             <span style="border-right: 7px solid transparent;">参数值</span>
             <span>操作</span>
           </li>
-          <li class="parameter-content" v-for="(item,index) in bycdaoCategory[countTo][2].parameters">
-            <input style="margin-top:10px;" @click="" class="parameter-checkbox" type="checkbox"
-                   :checked="item.required==true||selectAll"/>
+          <li   class="parameter-content" v-for="(item,index) in bycdaoCategory[countTo][2].parameters">
+            <input style="margin-top:10px;" @click="traverseRequiredArray[index]=!traverseRequiredArray[index]"   class="parameter-checkbox" type="checkbox"
+                   :checked="traverseRequiredArray[index]" />
             <input :value="item.name" class="parameter-name" type="text"/>
             <input class="parameter-value" type="text"/>
             <span class="parameter-operating">删除</span>
           </li>
         </ul>
       </div>
-      <div class="debugging-result">
+      <div class="debugging-result" v-show="resultShow">
         <span style="cursor:pointer;" @click="debugging='content'"
               :class="[debugging=='content'?'active':'']">响应内容</span>
         <span style="cursor:pointer;" @click="debugging='cookies'"
@@ -129,26 +129,51 @@
 <script type="text/ecmascript-6">
   import {mapMutations} from 'vuex'
   import statusCode from './statusCode.vue'
-
   export default {
     name: "app",
     data() {
-      return {switchA: 0, debugging: 'content', selectAll: false, curlMode: ""}
+      return {switchA: 0, resultShow:false,debugging: 'content',  curlMode: "",traverseRequiredArray:[]}
     },
     computed: {
       debugResponse() {
-        //   console.log("???",JSON.stringify(this.$store.state.debugRequest.debugResponse.bodyText))
         return this.$store.state.debugRequest.debugResponse;
       }
     },
     watch:{
       countTo:function () {
-        this.curlMode="";
-        this.switchA=0;
-        this.selectAll=false;
+//        this.curlMode="";
+//        this.switchA=0;
+//        this.debugResponse&&this.debugResponse.bodyText?this.debugResponse.bodyText="":"";
+//        this.debugResponse&&this.debugResponse.headers&&
+//        this.debugResponse.headers['map']&&this.debugResponse.headers['map']['content-type']&&
+//        this.debugResponse.headers['map']['content-type'][0]?
+//          this.debugResponse.headers['map']['content-type'][0]="":"";
+        this.resultShow=false;
       }
     },
     methods: {
+      traverseRequired:function () {
+        this.switchA=1;
+        if(!(this.bycdaoCategory&&this.countTo&&this.bycdaoCategory[this.countTo]&&this.bycdaoCategory[this.countTo][2]&&this.bycdaoCategory[this.countTo][2].parameters)){return false}
+        for(let i=0,n=this.bycdaoCategory[this.countTo][2].parameters.length;i<n;i++){
+          this.$set( this.traverseRequiredArray,i,this.bycdaoCategory[this.countTo][2].parameters[i].required)
+        }
+      },
+      selectAll:function () {
+        let j=true;
+        for(let i=0,n=this.traverseRequiredArray.length;i<n-1;i++){
+          this.traverseRequiredArray[i]== this.traverseRequiredArray[i+1]?"":j=false;
+        }
+        if(j){
+          for(let i=0,n=this.traverseRequiredArray.length;i<n;i++){
+            this.$set( this.traverseRequiredArray,i,!this.traverseRequiredArray[i])
+          }
+        }else{
+          for(let i=0,n=this.traverseRequiredArray.length;i<n;i++){
+            this.$set( this.traverseRequiredArray,i,true)
+          }
+        }
+      },
       getForm: function () {
         var _this = this;
         var result = [];
@@ -159,6 +184,7 @@
             var obj = [];
             obj.push(parameterContent[i].children[1].value);
             obj.push(parameterContent[i].children[2].value)
+            console.log(_this.bycdaoCategory[_this.countTo][2].parameters[i])
             obj.push(_this.bycdaoCategory[_this.countTo][2].parameters[i])
             result.push(obj);
           }
@@ -167,7 +193,7 @@
       },
       stitchUrl: function (result) {
         let _this = this;
-        let url = (_this.bycdaoCategory[0] && _this.bycdaoCategory[0][0]) ? _this.bycdaoCategory[0][0] : '',
+        let url = (_this.bycdaoCategory&&_this.bycdaoCategory[0] && _this.bycdaoCategory[0][0]) ? _this.bycdaoCategory[0][0] : '',
           params = {},
           headerParams = "",
           reqdata = "",
@@ -226,15 +252,17 @@
           console.log(curltable)
         } else {
           /* d data 非头部附带数据,只用于非get类型请求 */
-          let curlData = " -d \'";
+          let curlData = " -d \'  ";
+          console.log()
           for (let i in JSON.parse(reqdata)) {
             curlData += i + "=" + JSON.parse(reqdata)[i] + "&";
           }
           curlData = curlData.slice(0, curlData.length - 1);
           curlData += "\' ";
-          let curltable = ("curl -X " + _this.bycdaoCategory[this.countTo][1] + contentType + curlAccept + headerss + curlData + contentUrl);
+          let curltable = ("curl -X " + _this.bycdaoCategory[this.countTo][1] + contentType + curlAccept + headerss + (reqdata=='{}'?"":curlData) + contentUrl);
           _this.curlMode = curltable;
         }
+        this.resultShow=true;/* 显示结果 */
       },
       ...mapMutations(['send']),
     },

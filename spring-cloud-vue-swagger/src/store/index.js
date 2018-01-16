@@ -15,26 +15,26 @@ const dropDown={
   }
 }
 /* 下拉框下方的接口数据 */
-const  bycdaoLeftContent={
+const  leftDropDownBoxContent={
   state:{data:[]}
 }
 /* 初始化:获取单选框数据， */
 function init() {
-  Vue.http.get('http://localhost:8803/cloud-swagger-resources').then((responese)=>{
-    dropDown.state.data=responese.body;
+  Vue.http.get('http://localhost:8803/cloud-swagger-resources').then((response)=>{
+    dropDown.state.data=response.body;
     return true;
-  },(responese)=>{
-    dropDown.state.data="请求失败:"+responese;
+  },(response)=>{
+    dropDown.state.data="请求失败:"+response;
     return false;
   }).then((a)=> {
-    if(a&&dropDown.state.data[dropDown.state.count].swaggerResources&&dropDown.state.data[dropDown.state.count].swaggerResources[0]&&dropDown.state.data[dropDown.state.count].swaggerResources[0].location){
+    if(a&&dropDown.state.data[dropDown.state.count]&&dropDown.state.data[dropDown.state.count].swaggerResources&&dropDown.state.data[dropDown.state.count].swaggerResources[0]&&dropDown.state.data[dropDown.state.count].swaggerResources[0].location){
       /* dropDown.state.data[0]控制当前是第几个接口 */
       // bycdaoLeftContent.state.data=dropDown.state.data[0].swaggerResources[0]
-      Vue.http.get(dropDown.state.data[dropDown.state.count].swaggerResources[0].location).then((responese)=>{
-        bycdaoLeftContent.state.data=responese.body;
+      Vue.http.get(dropDown.state.data[dropDown.state.count].swaggerResources[0].location).then((response)=>{
+        leftDropDownBoxContent.state.data=response.body;
         return true;
-      },(responese)=>{
-        bycdaoLeftContent.state.data="请求失败:"+responese;
+      },(response)=>{
+        leftDropDownBoxContent.state.data="请求失败:"+response;
         return false;
       })
     }
@@ -47,10 +47,10 @@ const debugRequest={
   mutations:{
     send(state,n){
       Vue.http.get(n.url,n.data,{method:n.type,headers:n.headerParams})
-        .then(function (responese){
-          debugRequest.state.debugResponse=responese;
-        },function (responese){
-          debugRequest.state.debugResponse=responese;
+        .then(function (response){
+          debugRequest.state.debugResponse=response;
+        },function (response){
+          debugRequest.state.debugResponse=response;
         })
     }
   }
@@ -59,7 +59,7 @@ const debugRequest={
 export default new Vuex.Store({
   modules:{
     bycdaoLeftHead:dropDown,
-    bycdaoLeftContent:bycdaoLeftContent,
+    leftDropDownBoxContent:leftDropDownBoxContent,
     debugRequest:debugRequest
   }
 })

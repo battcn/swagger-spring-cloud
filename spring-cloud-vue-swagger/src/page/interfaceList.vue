@@ -7,11 +7,11 @@
             {{index===0?"default:":""}}{{item.swaggerResources[0].location}}
           </option>
         </select>
-        <li  v-for="(item,index) in bycdaoLeftContent.tags" @click="count=index"  v-bind:class="[count==index ? 'active' : '']">
+        <li  v-for="(item,index) in leftDropDownBoxContent.tags" @click="count=index"  v-bind:class="[count==index ? 'active' : '']">
           <i class="fa fa-file-text"></i>
           <span class="navList-name">{{item.name}}</span>
           <span class="navList-description">{{item.description}}</span>
-          <span class="navList-number">{{Object.keys(bycdaoLeftContent.paths[Object.keys(bycdaoLeftContent.paths)[index]]).length}}</span>
+          <span class="navList-number">{{Object.keys(leftDropDownBoxContent.paths[Object.keys(leftDropDownBoxContent.paths)[index]]).length}}</span>
         </li>
       </ul>
     </div>
@@ -50,19 +50,19 @@
       bycdaoLeftHead() {
         return this.$store.state.bycdaoLeftHead.data
       },
-      bycdaoLeftContent() {
-        return this.$store.state.bycdaoLeftContent.data;
+      leftDropDownBoxContent() {
+        return this.$store.state.leftDropDownBoxContent.data;
       },
       bycdaoCategory() {
         let current = [];
-        for (let i in this.$store.state.bycdaoLeftContent.data.paths) {
-          for (let n in this.$store.state.bycdaoLeftContent.data.paths[i]) {
-            let count = this.$store.state.bycdaoLeftContent.data.paths[i][n].tags[0];
+        for (let i in this.$store.state.leftDropDownBoxContent.data.paths) {
+          for (let n in this.$store.state.leftDropDownBoxContent.data.paths[i]) {
+            let count = this.$store.state.leftDropDownBoxContent.data.paths[i][n].tags[0];
             /* 判断当前数据的name是否与当前激活的接口tags一致:后台接口数据顺序与前台显示不一致，需要通过name判断
              * 对name一致的进行保存
               * */
-            if (count == this.bycdaoLeftContent.tags[this.count].name) {
-              current.push([i, n, this.$store.state.bycdaoLeftContent.data.paths[i][n],this.$store.state.bycdaoLeftContent.data]);
+            if (count == this.leftDropDownBoxContent.tags[this.count].name) {
+              current.push([i, n, this.$store.state.leftDropDownBoxContent.data.paths[i][n],this.$store.state.leftDropDownBoxContent.data]);
             }
           }
         }
