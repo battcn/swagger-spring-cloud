@@ -23,7 +23,7 @@
         </li>
       </ul>
     </div>
-    <interfaceMain v-bind:bycdaoCategory="bycdaoCategory" v-bind:countTo="countTo"></interfaceMain>
+    <interfaceMain v-bind:bg="bg" v-bind:bycdaoCategory="bycdaoCategory" v-bind:countTo="countTo"></interfaceMain>
   </div>
 </template>
 <script type="text/ecmascript-6">
@@ -32,7 +32,7 @@
   export default {
     name: 'app',
     data() {
-      return {selected: 0, count: 0, countTo: 0,bg:{"GET":'#D1EAFF',"POST":'#D1FED3',"PATCH":'#FFE2D2',"DELETE":'#FFD1D1'}}
+      return {selected: 0, count: 0, countTo: 0,bg:{"GET":'#D1EAFF',"POST":'#D1FED3',"PATCH":'#FFE2D2',"DELETE":'#FFD1D1',"PUT":"#F0E0CA"}}
     },
     watch: {
       selected: function (newSelected) {

@@ -6,7 +6,6 @@
     </div>
     <div v-show="switchA==0" style="" class="bycdao-content">
       <ul class="content-list" style="">
-        <li class="content-head"><b>API接口文档</b></li>
         <li><span>接口url</span>
           <div><span>{{bycdaoCategory[0]?bycdaoCategory[0][0]:''}}</span></div>
         </li>
@@ -48,19 +47,26 @@
           </div>
         </li>
         <li><span>响应Model</span>
-          <div><span>{{bycdaoCategory[countTo]?bycdaoCategory[countTo][2].responses['200'].schema.type:""}}</span></div>
+          <div><span>{{jsonData}}</span></div>
         </li>
-        <li><span>响应参数说明</span>
-          <div><span>{{bycdaoCategory[countTo]?bycdaoCategory[countTo][1]:""}}</span></div>
-        </li>
-        <li><span style="float: left;margin-bottom: -1000px;padding-bottom: 1000px;">响应</span>
-          <statusCode></statusCode>
+        <li><span >响应参数说明</span>
+          <div class="ResponseParameter">
+            <span v-show="(typeof InterfaceResponse) != 'object'">{{InterfaceResponse}}</span>
+            <ul v-show="(typeof InterfaceResponse) == 'object'">
+              <li class="head"><span>参数名称</span><span>类型</span><span>说明</span></li>
+              <li v-for="(item,index) in InterfaceResponse">
+                <span>{{index}}</span>
+                <span>{{item.type}}</span>
+                <span>{{item.description?item.description:"无"}}</span>
+              </li>
+            </ul>
+          </div>
         </li>
       </ul>
     </div>
     <div v-show="switchA==1" class="debugging-content">
       <div class="content-url">
-        <span>{{bycdaoCategory[countTo]?bycdaoCategory[countTo][1]:""}}</span>
+        <span :style="{backgroundColor:bg[bycdaoCategory[countTo][1].toUpperCase()]}">{{bycdaoCategory[countTo]?bycdaoCategory[countTo][1].toUpperCase():""}}</span>
         <div>
           <input v-bind:value="(bycdaoCategory[0]&&bycdaoCategory[0][0])?bycdaoCategory[0][0]:''"
                  style="width:100%;height: 23px;line-height: 23px;" type="text"/>
@@ -128,13 +134,77 @@
 </template>
 <script type="text/ecmascript-6">
   import {mapMutations} from 'vuex'
-  import statusCode from './statusCode.vue'
   export default {
     name: "app",
     data() {
-      return {switchA: 0, resultShow:false,debugging: 'content', selectAll:false ,curlMode: ""}
+      return {switchA: 0, resultShow:false,debugging: 'content', selectAll:false ,curlMode: "",jsonData:""}
     },
     computed: {
+      InterfaceResponse:function(){
+        let resp=this.bycdaoCategory[this.countTo]&&this.bycdaoCategory[this.countTo][2].responses;
+        var respBasis = false;
+        var respState;
+        for (let  key in resp) {
+          if (parseInt(key) >= 200 && parseInt(key) <= 299) {
+            respBasis = true;
+            respState = key;
+            break;
+          }
+        }
+        if (respBasis) {
+          let ok = resp[respState];
+          if (ok.hasOwnProperty("schema")) {
+            let schema = ok["schema"];
+            let ref = (schema["type"] && schema["type"] === "array" && schema["items"]) ? schema["items"].$ref : schema["$ref"];
+            let regex = new RegExp("#/definitions/(.*)$", "ig");
+            if (regex.test(ref)) {
+              let refType = RegExp.$1;
+              let flag = false;
+              let definitionsArray = this.bycdaoCategory[this.countTo]&&this.bycdaoCategory[this.countTo][3].definitions;
+              let deftion = null;
+              let definition = null;
+              for(let i in definitionsArray){
+                if(i=== refType){
+                  flag = true;
+                  deftion =definitionsArray[i];
+                  break
+                }
+              }
+              for (var key in deftion.properties) {
+                if (deftion.properties[key].type == "boolean") {
+                  deftion.properties[key] = true;
+                  continue;
+                }
+                if (deftion.properties[key].type == "integer") {
+                  deftion.properties[key] = 0 ;
+                  continue;
+                }
+                if ( deftion.properties[key].type == "string") {
+                  deftion.properties[key] = "String";
+                  continue;
+                }
+                if ( deftion.properties[key].type == "array") {
+                  deftion.properties[key] = "String";
+                  continue;
+                }
+              }
+              if (flag) {
+                this.jsonData=deftion.properties;
+              } else {
+                this.jsonData=refType;
+              }
+              return deftion&&deftion.properties;
+            }else {
+              //未发现ref属性
+              if (schema.hasOwnProperty("type")) {
+                this.jsonData=schema["type"]
+                return schema["type"];
+              }
+              return "无";
+            }
+          }
+        }
+      },
       debugResponse() {
         return this.$store.state.debugRequest.debugResponse;
       }
@@ -152,35 +222,21 @@
       }
     },
     methods: {
-//      traverseRequired:function () {
-//        this.switchA=1;
-//        if(!(this.bycdaoCategory&&this.countTo&&this.bycdaoCategory[this.countTo]&&this.bycdaoCategory[this.countTo][2]&&this.bycdaoCategory[this.countTo][2].parameters)){return false}
-//        for(let i=0,n=this.bycdaoCategory[this.countTo][2].parameters.length;i<n;i++){
-//          this.$set( this.traverseRequiredArray,i,this.bycdaoCategory[this.countTo][2].parameters[i].required)
-//        }
-//      },
-//      selectAll:function () {
-//        let j=true;
-//        for(let i=0,n=this.traverseRequiredArray.length;i<n-1;i++){
-//          this.traverseRequiredArray[i]== this.traverseRequiredArray[i+1]?"":j=false;
-//        }
-//        if(j){
-//          for(let i=0,n=this.traverseRequiredArray.length;i<n;i++){
-//            this.$set( this.traverseRequiredArray,i,!this.traverseRequiredArray[i])
-//          }
-//        }else{
-//          for(let i=0,n=this.traverseRequiredArray.length;i<n;i++){
-//            this.$set( this.traverseRequiredArray,i,true)
-//          }
-//        }
-//      },
       getForm: function () {
         var _this = this;
         var result = [];
         var parameterContent = document.getElementsByClassName("parameter-content");
         for (var i = 0, n = parameterContent.length; i < n; i++) {
           var option = parameterContent[i].children[0];
+          if(this.bycdaoCategory[this.countTo][2].parameters[i].required==true&&!parameterContent[i].children[0].checked){
+                 alert(parameterContent[i].children[1].value+"");
+                 return false;
+          }
           if (option.checked) {
+            if(parameterContent[i].children[2].value.trim().length==0){
+              alert(parameterContent[i].children[1].value+"不能为空");
+              return false;
+            }
             var obj = [];
             obj.push(parameterContent[i].children[1].value);
             obj.push(parameterContent[i].children[2].value)
@@ -203,13 +259,13 @@
           }
         }
         for (let i = 0, n = result.length; i < n; i++) {
-          if (_this.bycdaoCategory[0][2]["in"] === "path") {
+          if (result[i][2]["in"] === "path") {
             url = url.replace("{" + result[i][0] + "}", result[i][1]);
           } else {
-            if (_this.bycdaoCategory[0][2]["in"] === "body") {
+            if (result[i][2]["in"] === "body") {
               bodyparams += result[i][1];
             } else {
-              if (_this.bycdaoCategory[0][2]["in"] === "header") {
+              if (result[i][2]["in"] === "header") {
                 headerParams[result[i][0]] = result[i][1];
               } else {
                 result[i][1] ? params[result[i][0]] = result[i][1] : '';
@@ -265,11 +321,33 @@
       },
       ...mapMutations(['send']),
     },
-    props: ['bycdaoCategory', 'countTo'],
-    components: {statusCode}
+    props: ['bycdaoCategory', 'countTo','bg'],
   }
 </script>
 <style>
+  /* 响应参数说明部分 */
+  .ResponseParameter .head{
+    font-size: 16px;
+    font-weight: 700;
+    background-color: #F8F8F8;
+  }
+  .ResponseParameter >ul{
+      overflow: hidden;border:1px solid #ddd;
+  }
+  .ResponseParameter >ul li{
+    overflow: hidden;
+    border-bottom:1px solid #ddd;
+  }
+  .ResponseParameter >ul li:last-child{
+    border-bottom:0;
+  }
+  .ResponseParameter >ul li> span{
+    width: 30%;
+    float: left;    padding: 8px 4px;border-right:1px solid #ddd;
+  }
+  .ResponseParameter >ul li> span:last-child{
+    border-right:0;
+  }
   /* 调试结果区域样式 */
   .debugging-result {
     font-size: 0;
@@ -348,23 +426,26 @@
   .table-tr {
     border-bottom: 1px solid #ddd;
     overflow: hidden;
+    word-wrap: break-word;
   }
 
   .table-head {
     font-size: 16px;
     font-weight: 700;
+    background-color: #F8F8F8;
   }
 
   .table-head .table-td {
-    text-align: center;
     padding: 8px 4px;
   }
 
   .table-td {
     border-right: 1px solid #ddd;
-    width: 15.33%;
+    width: 15%;
     float: left;
     padding: 8px 4px;
+    /*padding-bottom: 1000px;*/
+    /*margin-bottom: -1000px;*/
     text-align: left;
   }
 
@@ -457,7 +538,6 @@
   .content-url > span {
     width: 50px;
     color: #fff;
-    background: #40A8FF;
     text-align: center;
     height: 100%;
     line-height: 35px;
@@ -508,7 +588,7 @@
   .content-list {
     text-align: left;
     margin: 0;
-    padding: 0;
+    padding: 15px;
     border: 1px solid #DDDDDD;
   }
 
@@ -519,11 +599,7 @@
     overflow: hidden;
   }
 
-  .content-list .content-head {
-    padding: 8px;
-    border-bottom-width: 2px;
-    text-align: center;
-  }
+
 
   .content-list > li > span {
     display: inline-block;
@@ -533,6 +609,7 @@
 
   .content-list > li > div {
     margin-left: 125px;
+    padding: 8px;
   }
 
   .content-list > li > div > span {
@@ -543,9 +620,12 @@
   .content-list > li > div .request-table {
     padding: 8px;
   }
+  .content-list > li > div .request-table >ul{
+    border:1px solid #ddd;
+    border-bottom:0;
+  }
 
   .content-list > li > span:nth-child(1) {
-    text-align: right;
     font-weight: 700;
     border-right: 1px solid #ddd;
     margin-bottom: -1000px;

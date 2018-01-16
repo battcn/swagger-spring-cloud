@@ -1280,12 +1280,6 @@
                     var deftion = null;
                     var definition = null;
                     for (var i = 0; i < definitionsArray.length; i++) {
-                        // var definition = definitionsArray[i];
-                        // if (definition.key === refType) {
-                        //     flag = true;
-                        //     htmlValue = definition.value;
-                        //     break;
-                        // }
                         if (definitionsArray[i].key === refType) {
                             flag = true;
                             deftion = DApiUI.deepCopy(definitionsArray[i].value);

@@ -1,5 +1,5 @@
 <template>
-  <div class="status-code" style="    margin-left: 0;">
+  <div class="status-code">
     <ul class="code-list">
       <li class="list-head"><span style="padding-right: 6px;">状态码</span><span>说明</span><span>schema</span></li>
       <li><span>200</span><span>http响应成功</span><span></span></li>
@@ -17,7 +17,7 @@
 </script>
 <style>
   .status-code {
-    padding-left: 125px;
+float:left;
   }
   .code-list {
     margin: 0;
