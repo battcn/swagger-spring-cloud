@@ -18,8 +18,8 @@
     <div class="bycdao-category" style="height: 100%;overflow-y: auto;overflow-x: hidden;">
       <ul style="margin: 0;padding: 0;">
         <li class="categoryLi" v-for="(item,index) in bycdaoCategory" @click="countTo=index" :style="{backgroundColor:bg[item[1].toUpperCase()]}" >
-          <span class="categoryLi-type">{{item[1].toUpperCase()}}</span>
-          <span class="categoryLi-name">{{item[2].summary}}</span>
+          <span class="categoryLi-type">{{item[1]?item[1].toUpperCase():""}}</span>
+          <span class="categoryLi-name">{{item[2]&&item[2].summary?item[2].summary:""}}</span>
         </li>
       </ul>
     </div>

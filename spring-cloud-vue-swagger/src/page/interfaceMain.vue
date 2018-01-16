@@ -66,7 +66,7 @@
     </div>
     <div v-show="switchA==1" class="debugging-content">
       <div class="content-url">
-        <span :style="{backgroundColor:bg[bycdaoCategory[countTo][1].toUpperCase()]}">{{bycdaoCategory[countTo]?bycdaoCategory[countTo][1].toUpperCase():""}}</span>
+        <span :style="{backgroundColor:bg[bycdaoCategory&&bycdaoCategory[countTo]&&bycdaoCategory[countTo][1].toUpperCase()]}">{{bycdaoCategory[countTo]&&bycdaoCategory[countTo][1]?bycdaoCategory[countTo][1].toUpperCase():""}}</span>
         <div>
           <input v-bind:value="(bycdaoCategory[0]&&bycdaoCategory[0][0])?bycdaoCategory[0][0]:''"
                  style="width:100%;height: 23px;line-height: 23px;" type="text"/>
@@ -536,7 +536,7 @@
   }
 
   .content-url > span {
-    width: 50px;
+    width: 80px;
     color: #fff;
     text-align: center;
     height: 100%;
@@ -548,7 +548,7 @@
 
   .content-url > div {
     display: block;
-    margin-left: 50px;
+    margin-left: 80px;
     margin-right: 88px;
     height: 35px;
   }
