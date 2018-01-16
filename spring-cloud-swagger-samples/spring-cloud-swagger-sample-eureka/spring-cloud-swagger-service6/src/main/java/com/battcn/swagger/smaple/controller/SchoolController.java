@@ -36,13 +36,13 @@ public class SchoolController {
         return school;
     }
 
-    @DeleteMapping
+    @DeleteMapping("/{id}")
     public int delete(@PathVariable("id") Integer id) {
         logger.info("schools delete {}", id);
         return id;
     }
 
-    @PatchMapping
+    @PatchMapping("/{id}")
     public int patch(@PathVariable("id") Integer id) {
         logger.info("schools patch {}", id);
         return id;
