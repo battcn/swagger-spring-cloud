@@ -2,7 +2,7 @@
   <div class="bycdao-main">
     <div class="switch">
       <span style="cursor:pointer;" @click="switchA=0" :class="[switchA==0?'active':'']">接口说明</span>
-      <span style="cursor:pointer;"  @click="traverseRequired" :class="[switchA==1?'active':'']">在线调试</span>
+      <span style="cursor:pointer;"  @click="switchA=1" :class="[switchA==1?'active':'']">在线调试</span>
     </div>
     <div v-show="switchA==0" style="" class="bycdao-content">
       <ul class="content-list" style="">
@@ -70,14 +70,14 @@
       <div class="content-parameter" v-if="bycdaoCategory[countTo]&&bycdaoCategory[countTo][2].parameters">
         <ul>
           <li class="parameter-head">
-            <input style="margin-top:10px;" type="checkbox" @click="selectAll"/>
+            <input style="margin-top:10px;" type="checkbox" @click="selectAll=!selectAll"/>
             <span>参数名称</span>
             <span style="border-right: 7px solid transparent;">参数值</span>
             <span>操作</span>
           </li>
           <li   class="parameter-content" v-for="(item,index) in bycdaoCategory[countTo][2].parameters">
-            <input style="margin-top:10px;" @click="traverseRequiredArray[index]=!traverseRequiredArray[index]"   class="parameter-checkbox" type="checkbox"
-                   :checked="traverseRequiredArray[index]" />
+            <input style="margin-top:10px;"    class="parameter-checkbox" type="checkbox"
+                   :checked="item.required||selectAll" />
             <input :value="item.name" class="parameter-name" type="text"/>
             <input class="parameter-value" type="text"/>
             <span class="parameter-operating">删除</span>
@@ -132,7 +132,7 @@
   export default {
     name: "app",
     data() {
-      return {switchA: 0, resultShow:false,debugging: 'content',  curlMode: "",traverseRequiredArray:[]}
+      return {switchA: 0, resultShow:false,debugging: 'content', selectAll:false ,curlMode: ""}
     },
     computed: {
       debugResponse() {
@@ -152,28 +152,28 @@
       }
     },
     methods: {
-      traverseRequired:function () {
-        this.switchA=1;
-        if(!(this.bycdaoCategory&&this.countTo&&this.bycdaoCategory[this.countTo]&&this.bycdaoCategory[this.countTo][2]&&this.bycdaoCategory[this.countTo][2].parameters)){return false}
-        for(let i=0,n=this.bycdaoCategory[this.countTo][2].parameters.length;i<n;i++){
-          this.$set( this.traverseRequiredArray,i,this.bycdaoCategory[this.countTo][2].parameters[i].required)
-        }
-      },
-      selectAll:function () {
-        let j=true;
-        for(let i=0,n=this.traverseRequiredArray.length;i<n-1;i++){
-          this.traverseRequiredArray[i]== this.traverseRequiredArray[i+1]?"":j=false;
-        }
-        if(j){
-          for(let i=0,n=this.traverseRequiredArray.length;i<n;i++){
-            this.$set( this.traverseRequiredArray,i,!this.traverseRequiredArray[i])
-          }
-        }else{
-          for(let i=0,n=this.traverseRequiredArray.length;i<n;i++){
-            this.$set( this.traverseRequiredArray,i,true)
-          }
-        }
-      },
+//      traverseRequired:function () {
+//        this.switchA=1;
+//        if(!(this.bycdaoCategory&&this.countTo&&this.bycdaoCategory[this.countTo]&&this.bycdaoCategory[this.countTo][2]&&this.bycdaoCategory[this.countTo][2].parameters)){return false}
+//        for(let i=0,n=this.bycdaoCategory[this.countTo][2].parameters.length;i<n;i++){
+//          this.$set( this.traverseRequiredArray,i,this.bycdaoCategory[this.countTo][2].parameters[i].required)
+//        }
+//      },
+//      selectAll:function () {
+//        let j=true;
+//        for(let i=0,n=this.traverseRequiredArray.length;i<n-1;i++){
+//          this.traverseRequiredArray[i]== this.traverseRequiredArray[i+1]?"":j=false;
+//        }
+//        if(j){
+//          for(let i=0,n=this.traverseRequiredArray.length;i<n;i++){
+//            this.$set( this.traverseRequiredArray,i,!this.traverseRequiredArray[i])
+//          }
+//        }else{
+//          for(let i=0,n=this.traverseRequiredArray.length;i<n;i++){
+//            this.$set( this.traverseRequiredArray,i,true)
+//          }
+//        }
+//      },
       getForm: function () {
         var _this = this;
         var result = [];
