@@ -142,7 +142,7 @@
     watch:{
       countTo:function () {
 //        this.curlMode="";
-//        this.switchA=0;
+        this.switchA=0;
 //        this.debugResponse&&this.debugResponse.bodyText?this.debugResponse.bodyText="":"";
 //        this.debugResponse&&this.debugResponse.headers&&
 //        this.debugResponse.headers['map']&&this.debugResponse.headers['map']['content-type']&&
@@ -184,7 +184,6 @@
             var obj = [];
             obj.push(parameterContent[i].children[1].value);
             obj.push(parameterContent[i].children[2].value)
-            console.log(_this.bycdaoCategory[_this.countTo][2].parameters[i])
             obj.push(_this.bycdaoCategory[_this.countTo][2].parameters[i])
             result.push(obj);
           }
