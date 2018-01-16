@@ -260,7 +260,8 @@
         }
         for (let i = 0, n = result.length; i < n; i++) {
           if (result[i][2]["in"] === "path") {
-            url = url.replace("{" + result[i][0] + "}", result[i][1]);
+//            url = url.replace("{" + result[i][0] + "}", result[i][1]);
+            url+="/"+result[i][1];
           } else {
             if (result[i][2]["in"] === "body") {
               bodyparams += result[i][1];
@@ -350,6 +351,7 @@
   }
   /* 调试结果区域样式 */
   .debugging-result {
+    text-align: left;
     font-size: 0;
   }
 
