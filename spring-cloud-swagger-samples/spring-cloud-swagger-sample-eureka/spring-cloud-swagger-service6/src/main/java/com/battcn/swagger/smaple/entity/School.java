@@ -3,8 +3,6 @@ package com.battcn.swagger.smaple.entity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-import java.util.List;
-
 /**
  * @author Levin
  * @since 2018/1/12 0012
@@ -17,9 +15,6 @@ public class School {
 
     @ApiModelProperty("学生")
     private Student student;
-
-    @ApiModelProperty("学生集合")
-    private List<Student> students;
 
     public long getId() {
         return id;
@@ -37,11 +32,4 @@ public class School {
         this.student = student;
     }
 
-    public List<Student> getStudents() {
-        return students;
-    }
-
-    public void setStudents(List<Student> students) {
-        this.students = students;
-    }
 }
