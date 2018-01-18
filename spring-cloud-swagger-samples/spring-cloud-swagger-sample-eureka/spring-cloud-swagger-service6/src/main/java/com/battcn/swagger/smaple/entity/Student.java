@@ -9,7 +9,7 @@ import java.util.List;
  * @author Levin
  * @since  2018/1/12 0012
  */
-@ApiModel
+@ApiModel(value = "Student", description = "学生")
 public class Student {
 
     @ApiModelProperty(value = "编号",required = true)

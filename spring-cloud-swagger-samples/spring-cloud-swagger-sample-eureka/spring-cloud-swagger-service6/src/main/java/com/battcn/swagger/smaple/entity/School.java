@@ -7,7 +7,7 @@ import io.swagger.annotations.ApiModelProperty;
  * @author Levin
  * @since 2018/1/12 0012
  */
-@ApiModel
+@ApiModel(value = "School", description = "学校")
 public class School {
 
     @ApiModelProperty("编号")

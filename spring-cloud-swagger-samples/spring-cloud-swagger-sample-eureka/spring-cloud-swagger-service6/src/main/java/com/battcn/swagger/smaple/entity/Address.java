@@ -7,7 +7,7 @@ import io.swagger.annotations.ApiModelProperty;
  * @author Levin
  * @since  2018-01-18.
  */
-@ApiModel
+@ApiModel(value = "Address", description = "地址")
 public class Address {
 
     @ApiModelProperty(value = "名称",required = true)
