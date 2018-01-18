@@ -10,8 +10,7 @@
   import 'normalize.css'
   import 'font-awesome/css/font-awesome.css'
   import list from './page/interfaceList.vue'
-  import interfaceMain from './page/interfaceMain.vue'
-
+  import interfaceMain from './page/interfaceMain.vue';
   export default {
     name: 'app',
     components: {list, interfaceMain}

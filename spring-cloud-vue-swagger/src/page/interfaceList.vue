@@ -1,4 +1,4 @@
-<template xmlns:v-bind="http://www.w3.org/1999/xhtml">
+<template xmlns:v-bind="http://www.w3.org/1999/xhtml" xmlns:v-on="" xmlns: xmlns:>
   <div style="padding-top:5px;">
     <div class="bycdao-left" style="height: 100%;overflow-y: auto;overflow-x: hidden;">
       <ul class="nav-list">
@@ -7,7 +7,8 @@
             {{index===0?"default:":""}}{{item.swaggerResources[0].location}}
           </option>
         </select>
-        <li  v-for="(item,index) in leftDropDownBoxContent.tags" @click="count=index"  v-bind:class="[count==index ? 'active' : '']">
+        <li v-for="(item,index) in leftDropDownBoxContent.tags" @click="count=index"
+            v-bind:class="[count==index ? 'active' : '']">
           <i class="fa fa-file-text"></i>
           <span class="navList-name">{{item.name}}</span>
           <span class="navList-description">{{item.description}}</span>
@@ -17,22 +18,44 @@
     </div>
     <div class="bycdao-category" style="height: 100%;overflow-y: auto;overflow-x: hidden;">
       <ul style="margin: 0;padding: 0;">
-        <li class="categoryLi" v-for="(item,index) in bycdaoCategory" @click="countTo=index" :style="{backgroundColor:bg[item[1].toUpperCase()]}" >
+        <li class="categoryLi" v-for="(item,index) in bycdaoCategory" @click="countTo=index"
+            :style="{backgroundColor:bg[item[1].toUpperCase()]}">
           <span class="categoryLi-type">{{item[1]?item[1].toUpperCase():""}}</span>
           <span class="categoryLi-name">{{item[2]&&item[2].summary?item[2].summary:""}}</span>
         </li>
       </ul>
     </div>
-    <interfaceMain v-bind:bg="bg" v-bind:bycdaoCategory="bycdaoCategory" v-bind:countTo="countTo"></interfaceMain>
+    <interfaceMain v-on:PromptPopUpShow="PromptPopUpShow" v-bind:bg="bg" v-bind:bycdaoCategory="bycdaoCategory" v-bind:countTo="countTo"></interfaceMain>
+    <transition name="fade">
+      <div v-show="control" class="popUps">
+        <div>
+          <h2 style="color: #c94e50;"><strong>{{hint}}</strong></h2>
+          <div>
+            <button @click="PromptPopUpHide"
+                    style="padding: 1em 2em;outline: none;font-weight: 600;border: none;color: #fff;background: #c94e50;">
+              close
+            </button>
+          </div>
+        </div>
+      </div>
+    </transition>
   </div>
 </template>
 <script type="text/ecmascript-6">
   import {mapMutations} from 'vuex'
   import interfaceMain from './interfaceMain.vue'
+
   export default {
     name: 'app',
     data() {
-      return {selected: 0, count: 0, countTo: 0,bg:{"GET":'#D1EAFF',"POST":'#D1FED3',"PATCH":'#FFE2D2',"DELETE":'#FFD1D1',"PUT":"#F0E0CA"}}
+      return {
+        selected: 0,
+        count: 0,
+        countTo: 0,
+        control: false,
+        hint: "",
+        bg: {"GET": '#D1EAFF', "POST": '#D1FED3', "PATCH": '#FFE2D2', "DELETE": '#FFD1D1', "PUT": "#F0E0CA"}
+      }
     },
     watch: {
       selected: function (newSelected) {
@@ -43,9 +66,17 @@
       }
     },
     methods: {
+      PromptPopUpShow: function (hint) {
+        this.hint = hint;
+        this.control = true;
+      },
+      PromptPopUpHide: function () {
+        this.hint = "";
+        this.control = false;
+      },
       ...mapMutations(['switch']),
     },
-    components:{interfaceMain},
+    components: {interfaceMain},
     computed: {
       bycdaoLeftHead() {
         return this.$store.state.bycdaoLeftHead.data
@@ -62,7 +93,7 @@
              * 对name一致的进行保存
               * */
             if (count == this.leftDropDownBoxContent.tags[this.count].name) {
-              current.push([i, n, this.$store.state.leftDropDownBoxContent.data.paths[i][n],this.$store.state.leftDropDownBoxContent.data]);
+              current.push([i, n, this.$store.state.leftDropDownBoxContent.data.paths[i][n], this.$store.state.leftDropDownBoxContent.data]);
             }
           }
         }
@@ -72,6 +103,49 @@
   }
 </script>
 <style>
+  /* 动画 */
+  .fade-enter-active, .fade-leave-active {
+    transition: opacity 5s;
+  }
+
+  .fade-enter, .fade-leave-to {
+    opacity: 0;
+  }
+
+  /* 提示弹窗 */
+  .popUps {
+    /*position: fixed;*/
+    /*top: 0;*/
+    /*left: 0;*/
+    /*bottom: 0;*/
+    /*right: 0;*/
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    background: rgba(55, 58, 71, 0.9);
+    /*opacity: 0;*/
+    transition: opacity 0.3s;
+  }
+
+  .popUps > div {
+    width: 50%;
+    max-width: 560px;
+    min-width: 290px;
+    background: #fff;
+    padding: 4em;
+    text-align: center;
+    position: absolute;
+    z-index: 5;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+
   /* select及其下方的接口宽度样式 */
   .bycdao-left {
     width: 230px;
@@ -89,6 +163,7 @@
     padding: 4px 6px;
     height: 36px;
   }
+
   .nav-list {
     margin: 0;
     padding: 0;
@@ -106,7 +181,7 @@
     cursor: pointer;
   }
 
-  .nav-list > li:hover ,.nav-list > li.active{
+  .nav-list > li:hover, .nav-list > li.active {
     background-color: #F3F8E4;
     color: #8ABF00;
     border-left: 5px solid #8ABF00;
@@ -155,11 +230,13 @@
     height: 100%;
     transition: all 0.2s;
   }
+
   .bycdao-category .categoryLi {
     text-align: left;
     margin-bottom: 10px;
     padding: 5px 10px;
   }
+
   .categoryLi .categoryLi-type {
     display: block;
     height: 20px;

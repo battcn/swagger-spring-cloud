@@ -47,7 +47,7 @@
           </div>
         </li>
         <li><span>响应Model</span>
-          <div><span>{{jsonData}}</span></div>
+          <div class="jsonData"><span>无</span></div>
         </li>
         <li><span >响应参数说明</span>
           <div class="ResponseParameter">
@@ -130,6 +130,7 @@
         </div>
       </div>
     </div>
+
   </div>
 </template>
 <script type="text/ecmascript-6">
@@ -137,13 +138,13 @@
   export default {
     name: "app",
     data() {
-      return {switchA: 0, resultShow:false,debugging: 'content', selectAll:false ,curlMode: "",jsonData:""}
+      return {switchA: 0, resultShow:false,debugging: 'content', selectAll:false ,curlMode: ""}
     },
     computed: {
       InterfaceResponse:function(){
-        let resp=this.bycdaoCategory[this.countTo]&&this.bycdaoCategory[this.countTo][2].responses;
-        var respBasis = false;
-        var respState;
+        let resp=this.deepCopy(this.bycdaoCategory[this.countTo]&&this.bycdaoCategory[this.countTo][2].responses);
+        let respBasis = false;
+        let respState;
         for (let  key in resp) {
           if (parseInt(key) >= 200 && parseInt(key) <= 299) {
             respBasis = true;
@@ -160,44 +161,24 @@
             if (regex.test(ref)) {
               let refType = RegExp.$1;
               let flag = false;
-              let definitionsArray = this.bycdaoCategory[this.countTo]&&this.bycdaoCategory[this.countTo][3].definitions;
+              let definitionsArray = this.deepCopy(this.bycdaoCategory[this.countTo]&&this.bycdaoCategory[this.countTo][3].definitions);
               let deftion = null;
               let definition = null;
               for(let i in definitionsArray){
                 if(i=== refType){
-                  flag = true;
-                  deftion =definitionsArray[i];
+                  definition =this.deepCopy(definitionsArray[i].properties);
                   break
                 }
               }
-              for (var key in deftion.properties) {
-                if (deftion.properties[key].type == "boolean") {
-                  deftion.properties[key] = true;
-                  continue;
-                }
-                if (deftion.properties[key].type == "integer") {
-                  deftion.properties[key] = 0 ;
-                  continue;
-                }
-                if ( deftion.properties[key].type == "string") {
-                  deftion.properties[key] = "String";
-                  continue;
-                }
-                if ( deftion.properties[key].type == "array") {
-                  deftion.properties[key] = "String";
-                  continue;
-                }
-              }
-              if (flag) {
-                this.jsonData=deftion.properties;
-              } else {
-                this.jsonData=refType;
-              }
-              return deftion&&deftion.properties;
+              deftion=this.JSONinit(refType);
+                $('.jsonData').JSONView(deftion);
+                console.log(this.bycdaoCategory[this.countTo]&&this.bycdaoCategory[this.countTo][3].definitions)
+              return definition;
             }else {
               //未发现ref属性
               if (schema.hasOwnProperty("type")) {
-                this.jsonData=schema["type"]
+                $('.jsonData').html("")
+                $('.jsonData').html(schema["type"])
                 return schema["type"];
               }
               return "无";
@@ -222,6 +203,69 @@
       }
     },
     methods: {
+      deepCopy:function (source) {
+        var result = {};
+        for (var key in source) {
+          result[key] = (typeof source[key] === 'object') ? this.deepCopy(source[key]) : source[key];
+        }
+        return result;
+      },
+      JSONinit:function (refType) {
+        let definitionsArray=this.deepCopy(this.bycdaoCategory[this.countTo]&&this.bycdaoCategory[this.countTo][3].definitions);
+        let deftion=null;
+        for(let i in definitionsArray){
+          if(i=== refType){
+            deftion =definitionsArray[i].properties;
+            break
+          }
+        }
+        for (var key in deftion) {
+          if(deftion[key].$ref&&deftion[key].type == "array"){
+            deftion[key]={};
+            continue;
+          }
+          if(deftion[key].$ref){
+            let schema=deftion[key];
+            let ref = (schema["type"] && schema["type"] === "array" && schema["items"]) ? schema["items"].$ref : schema["$ref"];
+            let regex = new RegExp("#/definitions/(.*)$", "ig");
+            if (regex.test(ref)) {
+              let a= ref.match("#/definitions/(.*)");
+              let refType2=a[1];
+              deftion[key]= this.JSONinit(refType2);
+              continue;
+            }
+          }
+          if(deftion[key].type == "array"&&deftion[key].items){
+            let schema=deftion[key];
+            let ref = (schema["type"] && schema["type"] === "array" && schema["items"]) ? schema["items"].$ref : schema["$ref"];
+            let regex = new RegExp("#/definitions/(.*)$", "ig");
+            if (regex.test(ref)) {
+              let a= ref.match("#/definitions/(.*)");
+              let refType2=a[1];
+              deftion[key]=[];
+              deftion[key].push(this.JSONinit(refType2)) ;
+              continue;
+            }
+          }
+          if(deftion[key].type == "array"){
+            deftion[key] = [];
+            continue;
+          }
+          if (deftion[key].type == "boolean") {
+            deftion[key] = true;
+            continue;
+          }
+          if (deftion[key].type == "integer") {
+            deftion[key] = 0 ;
+            continue;
+          }
+          if ( deftion[key].type == "string") {
+            deftion[key] = "";
+            continue;
+          }
+        }
+        return deftion;
+      },
       getForm: function () {
         var _this = this;
         var result = [];
@@ -229,12 +273,12 @@
         for (var i = 0, n = parameterContent.length; i < n; i++) {
           var option = parameterContent[i].children[0];
           if(this.bycdaoCategory[this.countTo][2].parameters[i].required==true&&!parameterContent[i].children[0].checked){
-                 alert(parameterContent[i].children[1].value+"");
-                 return false;
+            _this.$emit('PromptPopUpShow',parameterContent[i].children[1].value+"为必选字段")
+            return false;
           }
           if (option.checked) {
             if(parameterContent[i].children[2].value.trim().length==0){
-              alert(parameterContent[i].children[1].value+"不能为空");
+              _this.$emit('PromptPopUpShow',parameterContent[i].children[1].value+"不能为空")
               return false;
             }
             var obj = [];
@@ -322,10 +366,12 @@
       },
       ...mapMutations(['send']),
     },
-    props: ['bycdaoCategory', 'countTo','bg'],
+    props: ['bycdaoCategory', 'countTo','bg']
   }
 </script>
 <style>
+
+
   /* 响应参数说明部分 */
   .ResponseParameter .head{
     font-size: 16px;
@@ -521,6 +567,7 @@
     float: left;
     margin-left: 2%;
     margin-right: 2%;
+    max-height: 30px;
   }
 
   .content-parameter li .parameter-operating {
