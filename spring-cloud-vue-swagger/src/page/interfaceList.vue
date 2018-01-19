@@ -12,20 +12,22 @@
           <i class="fa fa-file-text"></i>
           <span class="navList-name">{{item.name}}</span>
           <span class="navList-description">{{item.description}}</span>
-          <span class="navList-number">{{Object.keys(leftDropDownBoxContent.paths[Object.keys(leftDropDownBoxContent.paths)[index]]).length}}</span>
+          <!--<span class="navList-number">{{Object.keys(leftDropDownBoxContent.paths[Object.keys(leftDropDownBoxContent.paths)[index]]).length}}</span>-->
+          <span class="navList-number">{{bycdaoCategory.length}}</span>
         </li>
       </ul>
     </div>
     <div class="bycdao-category" style="height: 100%;overflow-y: auto;overflow-x: hidden;">
       <ul style="margin: 0;padding: 0;">
-        <li class="categoryLi" v-for="(item,index) in bycdaoCategory" @click="countTo=index"
-            :style="{backgroundColor:bg[item[1].toUpperCase()]}">
-          <span class="categoryLi-type">{{item[1]?item[1].toUpperCase():""}}</span>
-          <span class="categoryLi-name">{{item[2]&&item[2].summary?item[2].summary:""}}</span>
+        <li class="categoryLi" v-for="item,index in bycdaoCategory" @click="countTo=index"
+            :style="{backgroundColor:bg[item.name.toUpperCase()]}"><!--:style="{backgroundColor:bg[item[1].toUpperCase()]}"-->
+          <!--<span class="categoryLi-type">{{key?key.toUpperCase():""}}</span>-->
+          <span class="categoryLi-type">{{item.name?item.name.toUpperCase():""}}</span>
+          <span class="categoryLi-name">{{item.pathInfo&&item.pathInfo.summary?item.pathInfo.summary:""}}</span>
         </li>
       </ul>
     </div>
-    <interfaceMain v-on:PromptPopUpShow="PromptPopUpShow" v-bind:bg="bg" v-bind:bycdaoCategory="bycdaoCategory" v-bind:countTo="countTo"></interfaceMain>
+    <interfaceMain v-on:PromptPopUpShow="PromptPopUpShow" v-bind:leftDropDownBoxContent="leftDropDownBoxContent" v-bind:bg="bg" v-bind:bycdaoCategory="bycdaoCategory" v-bind:countTo="countTo"></interfaceMain>
     <transition name="fade">
       <div v-show="control" class="popUps">
         <div>
@@ -82,21 +84,25 @@
         return this.$store.state.bycdaoLeftHead.data
       },
       leftDropDownBoxContent() {
+        console.log(this.$store.state.leftDropDownBoxContent.data)
         return this.$store.state.leftDropDownBoxContent.data;
       },
       bycdaoCategory() {
         let current = [];
-        for (let i in this.$store.state.leftDropDownBoxContent.data.paths) {
-          for (let n in this.$store.state.leftDropDownBoxContent.data.paths[i]) {
-            let count = this.$store.state.leftDropDownBoxContent.data.paths[i][n].tags[0];
+        for (let i in this.leftDropDownBoxContent.paths){
+          for (let n in this.leftDropDownBoxContent.paths[i]) {
+            let count = this.leftDropDownBoxContent.paths[i][n].tags[0];
             /* 判断当前数据的name是否与当前激活的接口tags一致:后台接口数据顺序与前台显示不一致，需要通过name判断
              * 对name一致的进行保存
               * */
             if (count == this.leftDropDownBoxContent.tags[this.count].name) {
-              current.push([i, n, this.$store.state.leftDropDownBoxContent.data.paths[i][n], this.$store.state.leftDropDownBoxContent.data]);
+//              current.push([i, n, this.leftDropDownBoxContent.paths[i][n], this.leftDropDownBoxContent]);
+              //current.push([i, this.leftDropDownBoxContent.paths[i][n]]);
+              current.push({pathName:i,name:n,pathInfo:this.leftDropDownBoxContent.paths[i][n]})
             }
           }
         }
+        console.log(current)
         return current;
       }
     }

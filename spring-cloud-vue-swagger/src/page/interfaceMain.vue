@@ -7,23 +7,24 @@
     <div v-show="switchA==0" style="" class="bycdao-content">
       <ul class="content-list" style="">
         <li><span>接口url</span>
-          <div><span>{{bycdaoCategory[0]?bycdaoCategory[0][0]:''}}</span></div>
+          <!--<div><span>{{bycdaoCategory[0]?bycdaoCategory[0].pathName:''}}</span></div>-->
+          <div><span>{{bycdaoCategory[countTo]&&bycdaoCategory[countTo].pathName?bycdaoCategory[countTo].pathName:""}}</span></div>
         </li>
         <li><span>接口名称</span>
-          <div><span>{{bycdaoCategory[countTo]?bycdaoCategory[countTo][2].summary:""}}</span></div>
+          <div><span>{{bycdaoCategory[countTo]&&bycdaoCategory[countTo].pathInfo?bycdaoCategory[countTo].pathInfo.summary:""}}</span></div>
         </li>
         <li><span>请求方式</span>
-          <div><span>{{bycdaoCategory[countTo]?bycdaoCategory[countTo][1]:""}}</span></div>
+          <div><span>{{bycdaoCategory[countTo]?bycdaoCategory[countTo].name:""}}</span></div>
         </li>
         <li><span>consumes</span>
-          <div><span>{{bycdaoCategory[countTo]?bycdaoCategory[countTo][2].consumes[0]:""}}</span></div>
+          <div><span>{{bycdaoCategory[countTo]&&bycdaoCategory[countTo].pathInfo&&bycdaoCategory[countTo].pathInfo.consumes?bycdaoCategory[countTo].pathInfo.consumes[0]:""}}</span></div>
         </li>
         <li><span>produces</span>
-          <div><span>{{bycdaoCategory[countTo]?bycdaoCategory[countTo][2].produces[0]:""}}</span></div>
+          <div><span>{{bycdaoCategory[countTo]&&bycdaoCategory[countTo].pathInfo&&bycdaoCategory[countTo].pathInfo.produces?bycdaoCategory[countTo].pathInfo.produces[0]:""}}</span></div>
         </li>
         <li><span>请求参数</span>
           <div>
-            <div class="request-table" v-if="bycdaoCategory[countTo]&&bycdaoCategory[countTo][2].parameters">
+            <div class="request-table" v-if="bycdaoCategory[countTo]&&bycdaoCategory[countTo].pathInfo&&bycdaoCategory[countTo].pathInfo.parameters">
               <ul>
                 <li class="table-tr table-head">
                   <span class="table-td">参数名称</span>
@@ -33,7 +34,7 @@
                   <span class="table-td">in</span>
                   <span class="table-td">是否必须</span>
                 </li>
-                <li class="table-tr" v-for="(item,index) in bycdaoCategory[countTo][2].parameters">
+                <li class="table-tr" v-for="(item,index) in bycdaoCategory[countTo].pathInfo.parameters">
                   <span class="table-td">{{item.name}}</span>
                   <span class="table-td">{{item.description?item.description:"无"}}</span>
                   <span class="table-td">{{item.type}}</span>
@@ -52,84 +53,84 @@
         <li><span >响应参数说明</span>
           <div class="ResponseParameter">
             <span v-show="(typeof InterfaceResponse) != 'object'">{{InterfaceResponse}}</span>
-            <ul v-show="(typeof InterfaceResponse) == 'object'">
-              <li class="head"><span>参数名称</span><span>类型</span><span>说明</span></li>
-              <li v-for="(item,index) in InterfaceResponse">
-                <span>{{index}}</span>
-                <span>{{item.type}}</span>
-                <span>{{item.description?item.description:"无"}}</span>
-              </li>
-            </ul>
+            <!--<ul v-show="(typeof InterfaceResponse) == 'object'">-->
+              <!--<li class="head"><span>参数名称</span><span>类型</span><span>说明</span></li>-->
+              <!--<li v-for="(item,index) in InterfaceResponse">-->
+                <!--<span>{{index}}</span>-->
+                <!--<span>{{item.type}}</span>-->
+                <!--<span>{{item.description?item.description:"无"}}</span>-->
+              <!--</li>-->
+            <!--</ul>-->
           </div>
         </li>
       </ul>
     </div>
-    <div v-show="switchA==1" class="debugging-content">
-      <div class="content-url">
-        <span :style="{backgroundColor:bg[bycdaoCategory&&bycdaoCategory[countTo]&&bycdaoCategory[countTo][1].toUpperCase()]}">{{bycdaoCategory[countTo]&&bycdaoCategory[countTo][1]?bycdaoCategory[countTo][1].toUpperCase():""}}</span>
-        <div>
-          <input v-bind:value="(bycdaoCategory[0]&&bycdaoCategory[0][0])?bycdaoCategory[0][0]:''"
-                 style="width:100%;height: 23px;line-height: 23px;" type="text"/>
-        </div>
-        <button type="button" @click="getForm">发送</button>
-      </div>
-      <div class="content-parameter" v-if="bycdaoCategory[countTo]&&bycdaoCategory[countTo][2].parameters">
-        <ul>
-          <li class="parameter-head">
-            <input style="margin-top:10px;" type="checkbox" @click="selectAll=!selectAll"/>
-            <span>参数名称</span>
-            <span style="border-right: 7px solid transparent;">参数值</span>
-            <span>操作</span>
-          </li>
-          <li   class="parameter-content" v-for="(item,index) in bycdaoCategory[countTo][2].parameters">
-            <input style="margin-top:10px;"    class="parameter-checkbox" type="checkbox"
-                   :checked="item.required||selectAll" />
-            <input :value="item.name" class="parameter-name" type="text"/>
-            <input class="parameter-value" type="text"/>
-            <span class="parameter-operating">删除</span>
-          </li>
-        </ul>
-      </div>
-      <div class="debugging-result" v-show="resultShow">
-        <span style="cursor:pointer;" @click="debugging='content'"
-              :class="[debugging=='content'?'active':'']">响应内容</span>
-        <span style="cursor:pointer;" @click="debugging='cookies'"
-              :class="[debugging=='cookies'?'active':'']">Cookies</span>
-        <span style="cursor:pointer;" @click="debugging='header'"
-              :class="[debugging=='header'?'active':'']">Header</span>
-        <span style="cursor:pointer;" @click="debugging='curl'" :class="[debugging=='curl'?'active':'']">curl方式</span>
-        <div class="result-content">
-          <div v-show="debugging=='content'">
-            <ul v-if="(typeof debugResponse.bodyText)=='object'">
-              <li v-for="item in debugResponse.bodyText">
-                <span>{{item}}</span>
-              </li>
-            </ul>
-            <li v-else>
-              <span>{{debugResponse.bodyText}}</span>
-            </li>
-          </div>
-          <div v-show="debugging=='cookies'">
-            <span>暂无</span>
-          </div>
-          <div class="debugging-header" v-show="debugging=='header'">
-            <ul style="border: 1px solid #ddd;">
-              <li class="head"><span>请求头</span><span>value</span></li>
-              <li><span>date</span><span></span></li>
-              <li><span>transfer-encoding</span><span></span></li>
-              <li><span>x-application-context</span><span></span></li>
-              <li><span>content-type</span><span>{{debugResponse&&debugResponse.headers&&debugResponse.headers['map']&&debugResponse.headers['map']['content-type']&&debugResponse.headers['map']['content-type'][0]}}</span></li>
-              <li><span>response-code</span><span>{{debugResponse&&debugResponse.status}}</span></li>
-            </ul>
-          </div>
-          <div class="debugging-curl" v-show="debugging=='curl'">
-            <div>
-              {{curlMode}}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <!--<div v-show="switchA==1" class="debugging-content">-->
+      <!--<div class="content-url">-->
+        <!--<span :style="{backgroundColor:bg[bycdaoCategory&&bycdaoCategory[countTo]&&bycdaoCategory[countTo][1].toUpperCase()]}">{{bycdaoCategory[countTo]&&bycdaoCategory[countTo][1]?bycdaoCategory[countTo][1].toUpperCase():""}}</span>-->
+        <!--<div>-->
+          <!--<input v-bind:value="(bycdaoCategory[0]&&bycdaoCategory[0][0])?bycdaoCategory[0][0]:''"-->
+                 <!--style="width:100%;height: 23px;line-height: 23px;" type="text"/>-->
+        <!--</div>-->
+        <!--<button type="button" @click="getForm">发送</button>-->
+      <!--</div>-->
+      <!--<div class="content-parameter" v-if="bycdaoCategory[countTo]&&bycdaoCategory[countTo][2].parameters">-->
+        <!--<ul>-->
+          <!--<li class="parameter-head">-->
+            <!--<input style="margin-top:10px;" type="checkbox" @click="selectAll=!selectAll"/>-->
+            <!--<span>参数名称</span>-->
+            <!--<span style="border-right: 7px solid transparent;">参数值</span>-->
+            <!--<span>操作</span>-->
+          <!--</li>-->
+          <!--<li   class="parameter-content" v-for="(item,index) in InterfaceRequest">-->
+            <!--<input style="margin-top:10px;"    class="parameter-checkbox" type="checkbox"-->
+                   <!--:checked="item.required||selectAll" />-->
+            <!--<input :value="item.name" class="parameter-name" type="text"/>-->
+            <!--<input class="parameter-value" type="text"/>-->
+            <!--<span class="parameter-operating">删除</span>-->
+          <!--</li>-->
+        <!--</ul>-->
+      <!--</div>-->
+      <!--<div class="debugging-result" v-show="resultShow">-->
+        <!--<span style="cursor:pointer;" @click="debugging='content'"-->
+              <!--:class="[debugging=='content'?'active':'']">响应内容</span>-->
+        <!--<span style="cursor:pointer;" @click="debugging='cookies'"-->
+              <!--:class="[debugging=='cookies'?'active':'']">Cookies</span>-->
+        <!--<span style="cursor:pointer;" @click="debugging='header'"-->
+              <!--:class="[debugging=='header'?'active':'']">Header</span>-->
+        <!--<span style="cursor:pointer;" @click="debugging='curl'" :class="[debugging=='curl'?'active':'']">curl方式</span>-->
+        <!--<div class="result-content">-->
+          <!--<div v-show="debugging=='content'">-->
+            <!--<ul v-if="(typeof debugResponse.bodyText)=='object'">-->
+              <!--<li v-for="item in debugResponse.bodyText">-->
+                <!--<span>{{item}}</span>-->
+              <!--</li>-->
+            <!--</ul>-->
+            <!--<li v-else>-->
+              <!--<span>{{debugResponse.bodyText}}</span>-->
+            <!--</li>-->
+          <!--</div>-->
+          <!--<div v-show="debugging=='cookies'">-->
+            <!--<span>暂无</span>-->
+          <!--</div>-->
+          <!--<div class="debugging-header" v-show="debugging=='header'">-->
+            <!--<ul style="border: 1px solid #ddd;">-->
+              <!--<li class="head"><span>请求头</span><span>value</span></li>-->
+              <!--<li><span>date</span><span></span></li>-->
+              <!--<li><span>transfer-encoding</span><span></span></li>-->
+              <!--<li><span>x-application-context</span><span></span></li>-->
+              <!--<li><span>content-type</span><span>{{debugResponse&&debugResponse.headers&&debugResponse.headers['map']&&debugResponse.headers['map']['content-type']&&debugResponse.headers['map']['content-type'][0]}}</span></li>-->
+              <!--<li><span>response-code</span><span>{{debugResponse&&debugResponse.status}}</span></li>-->
+            <!--</ul>-->
+          <!--</div>-->
+          <!--<div class="debugging-curl" v-show="debugging=='curl'">-->
+            <!--<div>-->
+              <!--{{curlMode}}-->
+            <!--</div>-->
+          <!--</div>-->
+        <!--</div>-->
+      <!--</div>-->
+    <!--</div>-->
 
   </div>
 </template>
@@ -142,7 +143,7 @@
     },
     computed: {
       InterfaceResponse:function(){
-        let resp=this.deepCopy(this.bycdaoCategory[this.countTo]&&this.bycdaoCategory[this.countTo][2].responses);
+        let resp=this.deepCopy(this.bycdaoCategory[this.countTo]&&this.bycdaoCategory[this.countTo].pathInfo&&this.bycdaoCategory[this.countTo].pathInfo.responses);
         let respBasis = false;
         let respState;
         for (let  key in resp) {
@@ -161,7 +162,7 @@
             if (regex.test(ref)) {
               let refType = RegExp.$1;
               let flag = false;
-              let definitionsArray = this.deepCopy(this.bycdaoCategory[this.countTo]&&this.bycdaoCategory[this.countTo][3].definitions);
+              let definitionsArray = this.deepCopy(this.leftDropDownBoxContent&&this.leftDropDownBoxContent.definitions);
               let deftion = null;
               let definition = null;
               for(let i in definitionsArray){
@@ -172,7 +173,6 @@
               }
               deftion=this.JSONinit(refType);
                 $('.jsonData').JSONView(deftion);
-                console.log(this.bycdaoCategory[this.countTo]&&this.bycdaoCategory[this.countTo][3].definitions)
               return definition;
             }else {
               //未发现ref属性
@@ -185,6 +185,38 @@
             }
           }
         }
+      },
+      InterfaceRequest:function(){
+         let  a={};
+         let n=[];
+        let i;
+     //   console.log(this.bycdaoCategory[this.countTo][2].parameters)
+        for(let parameters in this.bycdaoCategory[this.countTo][2].parameters){
+          let name=this.bycdaoCategory[this.countTo][2].parameters[parameters].name;
+          if(name.indexOf(".")>0){
+//           console.log(name.substr(0))
+            let st=name.substr(0,name.indexOf("."));
+            if(a[st]!=undefined&&a[st]!={}){
+              a[st].push(parameters)
+            }else{
+              a[st]=new Array();
+             a[st].push(parameters)
+            }
+          }else{
+            n.push(this.bycdaoCategory[this.countTo][2].parameters[parameters])
+          }
+        }
+        console.log(this.InterfaceResponse)
+//        for(let  key in a){
+//          let obj=this.InterfaceResponse[key];
+//          obj['childField']=[];
+//          for(let i in a[key]){
+//            obj['childField'].push(this.bycdaoCategory[this.countTo][2].parameters[i])
+//          }
+        //  n.push(obj);
+     //   }
+        console.log("n:",n)
+        return n;
       },
       debugResponse() {
         return this.$store.state.debugRequest.debugResponse;
@@ -203,6 +235,9 @@
       }
     },
     methods: {
+      titleCase5:function (str) {
+             return str.toLowerCase().replace(/( |^)[a-z]/g, (L) => L.toUpperCase());
+      },
       deepCopy:function (source) {
         var result = {};
         for (var key in source) {
@@ -366,7 +401,7 @@
       },
       ...mapMutations(['send']),
     },
-    props: ['bycdaoCategory', 'countTo','bg']
+    props: ['bycdaoCategory', 'countTo','bg','leftDropDownBoxContent']
   }
 </script>
 <style>
