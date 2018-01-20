@@ -25,13 +25,13 @@ public class SchoolController {
     }
 
     @PostMapping
-    public School post(School school) {
+    public School post(@RequestBody School school) {
         logger.info("schools post ");
         return school;
     }
 
     @PutMapping
-    public School put(School school) {
+    public School put(@RequestBody School school) {
         logger.info("schools put ");
         return school;
     }

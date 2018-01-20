@@ -25,13 +25,13 @@ public class StudentController {
     }
 
     @PostMapping
-    public Student post(Student student) {
+    public Student post(@RequestBody Student student) {
         logger.info("students post ");
         return student;
     }
 
     @PutMapping
-    public Student put(Student student) {
+    public Student put(@RequestBody Student student) {
         logger.info("students put ");
         return student;
     }
@@ -41,6 +41,7 @@ public class StudentController {
         logger.info("students delete {}", id);
         return id;
     }
+
     @PatchMapping("/{id}")
     public int patch(@PathVariable("id") Integer id) {
         logger.info("students patch {}", id);
