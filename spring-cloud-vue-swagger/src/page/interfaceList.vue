@@ -84,7 +84,6 @@
         return this.$store.state.bycdaoLeftHead.data
       },
       leftDropDownBoxContent() {
-        console.log(this.$store.state.leftDropDownBoxContent.data)
         return this.$store.state.leftDropDownBoxContent.data;
       },
       bycdaoCategory() {
@@ -97,12 +96,10 @@
               * */
             if (count == this.leftDropDownBoxContent.tags[this.count].name) {
 //              current.push([i, n, this.leftDropDownBoxContent.paths[i][n], this.leftDropDownBoxContent]);
-              //current.push([i, this.leftDropDownBoxContent.paths[i][n]]);
               current.push({pathName:i,name:n,pathInfo:this.leftDropDownBoxContent.paths[i][n]})
             }
           }
         }
-        console.log(current)
         return current;
       }
     }
