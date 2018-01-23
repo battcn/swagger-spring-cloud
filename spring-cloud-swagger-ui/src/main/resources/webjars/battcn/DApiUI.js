@@ -315,40 +315,7 @@
         })
     };
     /* 加载历史数据 */
-    // DApiUI.initHistory = function () {
-    //     /* 创建页面信息 "apiInfo"，url "url",请求类型 "type",表单对象 "data" */
-    //     var historys = JSON.parse(window.sessionStorage.getItem("historys"));
-    //     /* data中 包含 url 请求类型 输入框数据 */
-    //     if(historys !=undefined &&historys!=null&&historys!="null"){
-    //         var historyListUl = $(".bycao-header .historyList").html("");
-    //         $.each(historys, function (i, history) {
-    //             historyListUl.append('<li data-toggle="tooltip" data-placement="bottom" title="' + history.type.toUpperCase() + "&nbsp;" + history.url + '" index="' + i + '" style="background-color: ' + DApiUI.bgArray()[history.type ? history.type.toLowerCase() : ""] + '">' +
-    //                 '<span>' + history.url + '</span>' +
-    //                 '<i></i></li>')
-    //         });
-    //         /* 绑定删除事件 */
-    //         $(".bycao-header .historyList li i").on("click", function (e) {
-    //             e.stopPropagation();
-    //             var historyIndex = JSON.parse(window.sessionStorage.getItem("historys"));
-    //             historyIndex.splice(parseInt($(this).parents(".bycao-header .historyList li").attr("index")), 1);
-    //             window.sessionStorage.historys = JSON.stringify(historyIndex);
-    //             DApiUI.initHistory();
-    //         })
-    //         /* 绑定切换事件 */
-    //         $(".bycao-header .historyList li").on("click", function (e) {
-    //             e.stopPropagation();
-    //             var historyIndex = JSON.parse(window.sessionStorage.getItem("historys"));
-    //             DApiUI.createApiInfoTable(historyIndex[parseInt($(this).attr("index"))].apiinfo);
-    //             DApiUI.createDebugTab(historyIndex[$(this).attr("index")].apiinfo);
-    //             $("#tab2 #paramBody").html(historyIndex[parseInt($(this).attr("index"))]["data"]);
-    //             $("#myTab .nav-tabs>li:nth-child(2) a").trigger("click");
-    //         })
-    //     }else{
-    //         var historyListUl = $(".bycao-header .historyList").html("<span>无请求记录</span>");
-    //     }
-    //
-    //
-    // }
+
     DApiUI.getStringValue = function (obj) {
         var str = "";
         if (typeof (obj) !== 'undefined' && obj !== null) {

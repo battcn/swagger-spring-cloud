@@ -41,7 +41,8 @@
                   <span class="table-td">是否必须</span>
                 </li>
                 <div v-for="(item,key) in InterfaceRequest">
-                  <form-fold :depth="0" :properties="item.properties.properties" :keyTo="key" :item="item"></form-fold>
+                  <form-fold :depth="0" :properties="item.properties&&item.properties.properties" :keyTo="key"
+                             :item="item"></form-fold>
                 </div>
               </ul>
             </div>
@@ -77,73 +78,79 @@
         </div>
         <button type="button" @click="getForm">发送</button>
       </div>
-      <div class="content-parameter" v-if="bycdaoCategory[countTo]&&bycdaoCategory[countTo].pathInfo&&bycdaoCategory[countTo].pathInfo.parameters">
-      <ul>
-      <li class="parameter-head">
-      <input style="margin-top:10px;" type="checkbox" @click="selectAll=!selectAll"/>
-      <span>参数名称</span>
-      <span style="border-right: 7px solid transparent;">参数值</span>
-      <span>操作</span>
-      </li>
-      <li   class="parameter-content" v-for="(item,index) in InterfaceRequest">
-      <input style="margin-top:10px;"    class="parameter-checkbox" type="checkbox"
-      :checked="item.required||selectAll" />
-      <input :value="item.name" class="parameter-name" type="text"/>
-      <!--<input  class="parameter-value" type="text"/>-->
-        <textarea class="parameter-value" type="text">{{parameterValue}}</textarea>
-      <span class="parameter-operating">删除</span>
-      </li>
-      </ul>
+      <div class="content-parameter"
+           v-if="bycdaoCategory[countTo]&&bycdaoCategory[countTo].pathInfo&&bycdaoCategory[countTo].pathInfo.parameters">
+        <ul>
+          <li class="parameter-head">
+            <input style="margin-top:10px;" type="checkbox" @click="selectAll=!selectAll"/>
+            <span>参数名称</span>
+            <span style="border-right: 7px solid transparent;">参数值</span>
+            <span>操作</span>
+          </li>
+          <li class="parameter-content" v-for="(item,index) in InterfaceRequest">
+            <input style="margin-top:10px;" class="parameter-checkbox" type="checkbox"
+                   :checked="item.required||selectAll"/>
+            <input :value="item.name" class="parameter-name" type="text"/>
+            <!--<input  class="parameter-value" type="text"/>-->
+            <div class="parameter-value">
+              <textarea v-if="(typeof JSON.parse(parameterValue))=='object'" style="height:auto;width:100%;" type="text">{{parameterValue}}</textarea>
+              <input v-else :value="parameterValue" type="text" style="width:100%;margin-top: 8px;" />
+            </div>
+            <span class="parameter-operating">删除</span>
+          </li>
+        </ul>
+      </div>
+      <div class="debugging-result" v-show="resultShow">
+      <span style="cursor:pointer;" @click="debugging='content'"
+            :class="[debugging=='content'?'active':'']">响应内容</span>
+        <span style="cursor:pointer;" @click="debugging='cookies'"
+              :class="[debugging=='cookies'?'active':'']">Cookies</span>
+        <span style="cursor:pointer;" @click="debugging='header'"
+              :class="[debugging=='header'?'active':'']">Header</span>
+        <span style="cursor:pointer;" @click="debugging='curl'" :class="[debugging=='curl'?'active':'']">curl方式</span>
+        <div class="result-content">
+          <div v-show="debugging=='content'">
+            <ul v-if="(typeof debugResponse.bodyText)=='object'">
+              <li v-for="item in debugResponse.bodyText">
+                <span>{{item}}</span>
+              </li>
+            </ul>
+            <li v-else>
+              <span>{{debugResponse.bodyText}}</span>
+            </li>
+          </div>
+          <div v-show="debugging=='cookies'">
+            <span>暂无</span>
+          </div>
+          <div class="debugging-header" v-show="debugging=='header'">
+            <ul style="border: 1px solid #ddd;">
+              <li class="head"><span>请求头</span><span>value</span></li>
+              <li><span>date</span><span></span></li>
+              <li><span>transfer-encoding</span><span></span></li>
+              <li><span>x-application-context</span><span></span></li>
+              <li><span>content-type</span><span>{{debugResponse&&debugResponse.headers&&debugResponse.headers['map']&&debugResponse.headers['map']['content-type']&&debugResponse.headers['map']['content-type'][0]}}</span>
+              </li>
+              <li><span>response-code</span><span>{{debugResponse&&debugResponse.status}}</span></li>
+            </ul>
+          </div>
+          <div class="debugging-curl" v-show="debugging=='curl'">
+            <div>
+              {{curlMode}}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="debugging-result" v-show="resultShow">
-      <!--<span style="cursor:pointer;" @click="debugging='content'"-->
-      <!--:class="[debugging=='content'?'active':'']">响应内容</span>-->
-      <!--<span style="cursor:pointer;" @click="debugging='cookies'"-->
-      <!--:class="[debugging=='cookies'?'active':'']">Cookies</span>-->
-      <!--<span style="cursor:pointer;" @click="debugging='header'"-->
-      <!--:class="[debugging=='header'?'active':'']">Header</span>-->
-      <!--<span style="cursor:pointer;" @click="debugging='curl'" :class="[debugging=='curl'?'active':'']">curl方式</span>-->
-      <!--<div class="result-content">-->
-      <!--<div v-show="debugging=='content'">-->
-      <!--<ul v-if="(typeof debugResponse.bodyText)=='object'">-->
-      <!--<li v-for="item in debugResponse.bodyText">-->
-      <!--<span>{{item}}</span>-->
-      <!--</li>-->
-      <!--</ul>-->
-      <!--<li v-else>-->
-      <!--<span>{{debugResponse.bodyText}}</span>-->
-      <!--</li>-->
-      <!--</div>-->
-      <!--<div v-show="debugging=='cookies'">-->
-      <!--<span>暂无</span>-->
-      <!--</div>-->
-      <!--<div class="debugging-header" v-show="debugging=='header'">-->
-      <!--<ul style="border: 1px solid #ddd;">-->
-      <!--<li class="head"><span>请求头</span><span>value</span></li>-->
-      <!--<li><span>date</span><span></span></li>-->
-      <!--<li><span>transfer-encoding</span><span></span></li>-->
-      <!--<li><span>x-application-context</span><span></span></li>-->
-      <!--<li><span>content-type</span><span>{{debugResponse&&debugResponse.headers&&debugResponse.headers['map']&&debugResponse.headers['map']['content-type']&&debugResponse.headers['map']['content-type'][0]}}</span></li>-->
-      <!--<li><span>response-code</span><span>{{debugResponse&&debugResponse.status}}</span></li>-->
-      <!--</ul>-->
-      <!--</div>-->
-      <!--<div class="debugging-curl" v-show="debugging=='curl'">-->
-      <!--<div>-->
-      <!--{{curlMode}}-->
-      <!--</div>-->
-      <!--</div>-->
-      <!--</div>-->
-    </div>
-  </div>
   </div>
 </template>
 <script type="text/ecmascript-6">
   import {mapMutations} from 'vuex'
   import FormFold from './formFold.vue'
+
   export default {
     name: "app",
     data() {
-      return {switchA: 0, resultShow: false, debugging: 'content', selectAll: false, curlMode: "",parameterValue:""}
+      return {switchA: 0, resultShow: false, debugging: 'content', selectAll: false, curlMode: "", parameterValue: ""}
     },
     computed: {
       InterfaceResponse: function () {
@@ -177,13 +184,14 @@
               }
               deftion = this.JSONinit(refType);
               $('.jsonData').JSONView(deftion);
-              this.parameterValue=this.formatterJson(JSON.stringify(deftion));
+              this.parameterValue = this.formatterJson(JSON.stringify(deftion));
               return definition;
             } else {
               //未发现ref属性
               if (schema.hasOwnProperty("type")) {
                 $('.jsonData').html("")
                 $('.jsonData').html(schema["type"])
+                this.parameterValue=this.basicTypeInit(schema["type"])
                 return schema["type"];
               }
               return "无";
@@ -197,11 +205,11 @@
         let definitions = this.deepCopy(this.leftDropDownBoxContent.definitions);
         for (let i in parameters) {
           if (parameters[i].schema && parameters[i].schema.$ref) {
-            result[i]=parameters[i];
-            result[i]['properties']=this.formatRequest(parameters[i].schema.$ref);
+            result[i] = parameters[i];
+            result[i]['properties'] = this.formatRequest(parameters[i].schema.$ref);
           } else {
-            result[i]=parameters[i];
-            result[i]['properties']=parameters[i];
+            result[i] = parameters[i];
+            //result[i]['properties']=parameters[i];
           }
         }
         return result;
@@ -224,219 +232,235 @@
     },
     methods: {
       formatterJson: function (text_value) {
-    let res = "";
-    for (let i = 0, j = 0, k = 0, ii, ele; i < text_value.length; i++) {//k:缩进，j:""个数
-      ele = text_value.charAt(i);
-      if (j % 2 === 0 && ele === "}") {
-        k--;
-        for (ii = 0; ii < k; ii++) ele = "    " + ele;
-        ele = "\n" + ele;
-      }
-      else if (j % 2 === 0 && ele === "{") {
-        ele += "\n";
-        k++;
-        //debugger;
-        for (ii = 0; ii < k; ii++) ele += "    ";
-      }
-      else if (j % 2 === 0 && ele === ",") {
-        ele += "\n";
-        for (ii = 0; ii < k; ii++) ele += "    ";
-      }
-      else if (ele === "\"") j++;
-      res += ele;
-    }
-    return res;
-  },
-      formatRequest: function(itemsRef) {
+        let res = "";
+        for (let i = 0, j = 0, k = 0, ii, ele; i < text_value.length; i++) {//k:缩进，j:""个数
+          ele = text_value.charAt(i);
+          if (j % 2 === 0 && ele === "}") {
+            k--;
+            for (ii = 0; ii < k; ii++) ele = "    " + ele;
+            ele = "\n" + ele;
+          }
+          else if (j % 2 === 0 && ele === "{") {
+            ele += "\n";
+            k++;
+            //debugger;
+            for (ii = 0; ii < k; ii++) ele += "    ";
+          }
+          else if (j % 2 === 0 && ele === ",") {
+            ele += "\n";
+            for (ii = 0; ii < k; ii++) ele += "    ";
+          }
+          else if (ele === "\"") j++;
+          res += ele;
+        }
+        return res;
+      },
+      formatRequest: function (itemsRef) {
         let objName = itemsRef.match("#/definitions/(.*)")[1];
         let result = {};
         let definitions = this.deepCopy(this.leftDropDownBoxContent.definitions);
-        for(let key in definitions){
+        for (let key in definitions) {
           if (key.toLowerCase() == objName.toLowerCase()) {
-            result=this.deepCopy(definitions[key]);
-            let properties=definitions[key].properties
-            for(let k in properties){
-              if((properties[k].items&&properties[k].items.$ref)||properties[k].$ref){
-                (properties[k].items&&properties[k].items.$ref)?result.properties[k]=this.formatRequest(properties[k].items.$ref):(properties[k].$ref?result.properties[k]=this.formatRequest(properties[k].$ref):"")
-              }else{
-                result.properties[k]=properties[k];
+            result = this.deepCopy(definitions[key]);
+            let properties = definitions[key].properties
+            for (let k in properties) {
+              if ((properties[k].items && properties[k].items.$ref) || properties[k].$ref) {
+                (properties[k].items && properties[k].items.$ref) ? result.properties[k] = this.formatRequest(properties[k].items.$ref) : (properties[k].$ref ? result.properties[k] = this.formatRequest(properties[k].$ref) : "")
+              } else {
+                result.properties[k] = properties[k];
               }
             }
           }
         }
         return result;
       },
-        titleCase5:function (str) {
-          return str.toLowerCase().replace(/( |^)[a-z]/g, (L) => L.toUpperCase());
-        },
-        deepCopy:function (source) {
-          var result = {};
-          for (var key in source) {
-            result[key] = (typeof source[key] === 'object') ? this.deepCopy(source[key]) : source[key];
+      titleCase5: function (str) {
+        return str.toLowerCase().replace(/( |^)[a-z]/g, (L) => L.toUpperCase());
+      },
+      deepCopy: function (source) {
+        var result = {};
+        for (var key in source) {
+          result[key] = (typeof source[key] === 'object') ? this.deepCopy(source[key]) : source[key];
+        }
+        return result;
+      },
+      basicTypeInit: function (type) {
+        if (type == 'integer' || type == 'number') {
+          return 0;
+        }
+        if (type == 'boolean') {
+          return 'false'
+        }
+        if (type == 'string') {
+          return ""
+        }
+      },
+      JSONinit: function (refType) {
+        let _this = this;
+        let definitionsArray = this.deepCopy(_this.leftDropDownBoxContent && _this.leftDropDownBoxContent.definitions);
+        let deftion = null;
+        for (let i in definitionsArray) {
+          if (i === refType) {
+            deftion = definitionsArray[i].properties;
+            break
           }
-          return result;
-        },
-        JSONinit:function (refType) {
-          let _this = this;
-          let definitionsArray = this.deepCopy(_this.leftDropDownBoxContent && _this.leftDropDownBoxContent.definitions);
-          let deftion = null;
-          for (let i in definitionsArray) {
-            if (i === refType) {
-              deftion = definitionsArray[i].properties;
-              break
-            }
+        }
+        for (var key in deftion) {
+          if (deftion[key].$ref && deftion[key].type == "array") {
+            deftion[key] = {};
+            continue;
           }
-          for (var key in deftion) {
-            if (deftion[key].$ref && deftion[key].type == "array") {
-              deftion[key] = {};
+          if (deftion[key].$ref) {
+            let schema = deftion[key];
+            let ref = (schema["type"] && schema["type"] === "array" && schema["items"]) ? schema["items"].$ref : schema["$ref"];
+            let regex = new RegExp("#/definitions/(.*)$", "ig");
+            if (regex.test(ref)) {
+              let a = ref.match("#/definitions/(.*)");
+              let refType2 = a[1];
+              deftion[key] = this.JSONinit(refType2);
               continue;
             }
-            if (deftion[key].$ref) {
-              let schema = deftion[key];
-              let ref = (schema["type"] && schema["type"] === "array" && schema["items"]) ? schema["items"].$ref : schema["$ref"];
-              let regex = new RegExp("#/definitions/(.*)$", "ig");
-              if (regex.test(ref)) {
-                let a = ref.match("#/definitions/(.*)");
-                let refType2 = a[1];
-                deftion[key] = this.JSONinit(refType2);
-                continue;
-              }
-            }
-            if (deftion[key].type == "array" && deftion[key].items) {
-              let schema = deftion[key];
-              let ref = (schema["type"] && schema["type"] === "array" && schema["items"]) ? schema["items"].$ref : schema["$ref"];
-              let regex = new RegExp("#/definitions/(.*)$", "ig");
-              if (regex.test(ref)) {
-                let a = ref.match("#/definitions/(.*)");
-                let refType2 = a[1];
-                deftion[key] = [];
-                deftion[key].push(this.JSONinit(refType2));
-                continue;
-              }
-            }
-            if (deftion[key].type == "array") {
+          }
+          if (deftion[key].type == "array" && deftion[key].items) {
+            let schema = deftion[key];
+            let ref = (schema["type"] && schema["type"] === "array" && schema["items"]) ? schema["items"].$ref : schema["$ref"];
+            let regex = new RegExp("#/definitions/(.*)$", "ig");
+            if (regex.test(ref)) {
+              let a = ref.match("#/definitions/(.*)");
+              let refType2 = a[1];
               deftion[key] = [];
-              continue;
-            }
-            if (deftion[key].type == "boolean") {
-              deftion[key] = true;
-              continue;
-            }
-            if (deftion[key].type == "integer") {
-              deftion[key] = 0;
-              continue;
-            }
-            if (deftion[key].type == "string") {
-              deftion[key] = "";
+              deftion[key].push(this.JSONinit(refType2));
               continue;
             }
           }
-          return deftion;
-        },
-        getForm: function () {
-          var _this = this;
-          var result = [];
-          var parameterContent = document.getElementsByClassName("parameter-content");
-          for (var i = 0, n = parameterContent.length; i < n; i++) {
-            var option = parameterContent[i].children[0];
-            if (this.bycdaoCategory[this.countTo][2].parameters[i].required == true && !parameterContent[i].children[0].checked) {
-              _this.$emit('PromptPopUpShow', parameterContent[i].children[1].value + "为必选字段")
+          if (deftion[key].type == "array") {
+            deftion[key] = [];
+            continue;
+          }
+          if (deftion[key].type == "boolean") {
+            deftion[key] = true;
+            continue;
+          }
+          if (deftion[key].type == "integer") {
+            deftion[key] = 0;
+            continue;
+          }
+          if (deftion[key].type == "string") {
+            deftion[key] = "";
+            continue;
+          }
+        }
+        return deftion;
+      },
+      getForm: function () {
+        var _this = this;
+        var result = [];
+        var parameterContent = document.getElementsByClassName("parameter-content");
+        for (var i = 0, n = parameterContent.length; i < n; i++) {
+          var option = parameterContent[i].children[0];
+          if (this.bycdaoCategory[this.countTo].pathInfo.parameters[i].required == true && !parameterContent[i].children[0].checked) {
+            _this.$emit('PromptPopUpShow', parameterContent[i].children[1].value + "为必选字段")
+            return false;
+          }
+          let inputEle=$(parameterContent[i].children[2]).find("textarea")[0]?$(parameterContent[i].children[2]).find("textarea"):$(parameterContent[i].children[2]).find("input")
+          if (option.checked) {
+            if (inputEle.val().trim().length == 0) {
+              _this.$emit('PromptPopUpShow', parameterContent[i].children[1].value + "不能为空")
               return false;
             }
-            if (option.checked) {
-              if (parameterContent[i].children[2].value.trim().length == 0) {
-                _this.$emit('PromptPopUpShow', parameterContent[i].children[1].value + "不能为空")
-                return false;
-              }
-              var obj = [];
-              obj.push(parameterContent[i].children[1].value);
-              obj.push(parameterContent[i].children[2].value)
-              obj.push(_this.bycdaoCategory[_this.countTo][2].parameters[i])
-              result.push(obj);
-            }
+            var obj = [];
+            obj.push(parameterContent[i].children[1].value);
+            obj.push(JSON.parse(inputEle.val()))
+            obj.push(_this.bycdaoCategory[_this.countTo].pathInfo.parameters[i])
+            result.push(obj);
           }
-          _this.stitchUrl(result);
-        },
-        stitchUrl: function (result) {
-          let _this = this;
-          let url = (_this.bycdaoCategory && _this.bycdaoCategory[0] && _this.bycdaoCategory[0][0]) ? _this.bycdaoCategory[0][0] : '',
-            params = {},
-            headerParams = "",
-            reqdata = "",
-            bodyparams = "";
-          if (typeof (_this.bycdaoCategory[0][3].basePath) !== "undefined" && _this.bycdaoCategory[0][3].basePath !== "") {
-            if (_this.bycdaoCategory[0][3].basePath !== "/") {
-              url = _this.bycdaoCategory[0][3].basePath + url;
-            }
-          }
-          for (let i = 0, n = result.length; i < n; i++) {
-            if (result[i][2]["in"] === "path") {
-//            url = url.replace("{" + result[i][0] + "}", result[i][1]);
-              url += "/" + result[i][1];
-            } else {
-              if (result[i][2]["in"] === "body") {
-                bodyparams += result[i][1];
-              } else {
-                if (result[i][2]["in"] === "header") {
-                  headerParams[result[i][0]] = result[i][1];
-                } else {
-                  result[i][1] ? params[result[i][0]] = result[i][1] : '';
-                }
-              }
-            }
-          }
-          reqdata = params;
-          let jsonReqdata = JSON.stringify(reqdata)
-          this.$store.commit('send', {
-            url: "http://" + _this.bycdaoCategory[0][3].host + url,
-            headerParams: headerParams,
-            type: _this.bycdaoCategory[this.countTo][1],
-            data: reqdata
-          });
-          // this.debugResponse=this.$store.state.debugRequest.data;
-          /* 冰洁curl口令 */
-          setTimeout(() => {
-            _this.StitchingCurl(headerParams, jsonReqdata);
-          }, 1000);
-        },
-        StitchingCurl: function (headerParams, reqdata) {
-          let _this = this;
-          let headerss = "";
-          let contentUrl = "\'" + _this.debugResponse.url + "\'";
-          let curlAccept = " --header \'Accept:  " + _this.debugResponse.headers['map']['content-type'][0] + "\' ";
-          for (let key in headerParams) {
-            headerss += (key + ": " + headerParams[key]);
-          }
-          /*  生成curl命令组成部分 */
-          /* 头部数据 */
-          headerss != "" ? headerss = " --header \'" + headerss + "\' " : "";
-          let contentType = " --header \'Content-Type:  " + _this.debugResponse.headers['map']['content-type'][0] + "\' "
-          if (_this.bycdaoCategory[this.countTo][1].toLowerCase() == 'get') {
-            let curltable = ("curl -X " + _this.bycdaoCategory[this.countTo][1] +
-              " --header \'Accept:  " + _this.debugResponse.headers['map']['content-type'][0] + "\' " +
-              headerss + contentUrl);
-            _this.curlMode = curltable;
-            console.log(curltable)
-          } else {
-            /* d data 非头部附带数据,只用于非get类型请求 */
-            let curlData = " -d \'  ";
-            console.log()
-            for (let i in JSON.parse(reqdata)) {
-              curlData += i + "=" + JSON.parse(reqdata)[i] + "&";
-            }
-            curlData = curlData.slice(0, curlData.length - 1);
-            curlData += "\' ";
-            let curltable = ("curl -X " + _this.bycdaoCategory[this.countTo][1] + contentType + curlAccept + headerss + (reqdata == '{}' ? "" : curlData) + contentUrl);
-            _this.curlMode = curltable;
-          }
-          this.resultShow = true;
-          /* 显示结果 */
-        },
-      ...mapMutations(['send']),
+        }
+        _this.stitchUrl(result);
       },
+      stitchUrl: function (result) {
+        let _this = this;
+        let url = (_this.bycdaoCategory && _this.bycdaoCategory[_this.countTo] && _this.bycdaoCategory[_this.countTo].pathName) ? _this.bycdaoCategory[_this.countTo].pathName : '',
+          params = {},
+          headerParams = "",
+          reqdata = "",
+          bodyparams = "";
+        if (typeof (_this.leftDropDownBoxContent.basePath) !== "undefined" && _this.leftDropDownBoxContent.basePath !== "") {
+          if (_this.leftDropDownBoxContent.basePath !== "/") {
+            url = _this.leftDropDownBoxContent.basePath + url;
+          }
+        }
+        for (let i = 0, n = result.length; i < n; i++) {
+          if (result[i][2]["in"] === "path") {
+//            url = url.replace("{" + result[i][0] + "}", result[i][1]);
+            url += "/" + result[i][1];
+          } else {
+            if (result[i][2]["in"] === "body") {
+              bodyparams += JSON.stringify(result[i][1]);
+            } else {
+              if (result[i][2]["in"] === "header") {
+                headerParams[result[i][0]] = result[i][1];
+              } else {
+                result[i][1] ? params[result[i][0]] = result[i][1] : '';
+              }
+            }
+          }
+        }
+        if (result && result[0] && result[0][2] && result[0][2]["in"] && result[0][2]["in"] === "body") {
+          reqdata = bodyparams;
+        } else {
+          reqdata = params;
+        }
+        let jsonReqdata = reqdata;
+        this.$store.commit('send', {
+          url: "http://" + _this.leftDropDownBoxContent.host + url,
+          headerParams: headerParams,
+          type: _this.bycdaoCategory[this.countTo].name,
+          data: reqdata
+        });
+        // this.debugResponse=this.$store.state.debugRequest.data;
+        /* 冰洁curl口令 */
+        setTimeout(() => {
+          _this.StitchingCurl(headerParams, jsonReqdata);
+        }, 1000);
+      },
+      StitchingCurl: function (headerParams, reqdata) {
+        let _this = this;
+        let headerss = "";
+        let contentUrl = "\'" + _this.debugResponse.url + "\'";
+        let curlAccept = " --header \'Accept:  " + _this.debugResponse.headers['map']['content-type'][0] + "\' ";
+        for (let key in headerParams) {
+          headerss += (key + ": " + headerParams[key]);
+        }
+        /*  生成curl命令组成部分 */
+        /* 头部数据 */
+        headerss != "" ? headerss = " --header \'" + headerss + "\' " : "";
+        let contentType = " --header \'Content-Type:  " + _this.debugResponse.headers['map']['content-type'][0] + "\' "
+        if (_this.bycdaoCategory[this.countTo].name.toLowerCase() == 'get') {
+          let curltable = ("curl -X " + _this.bycdaoCategory[this.countTo].name +
+            " --header \'Accept:  " + _this.debugResponse.headers['map']['content-type'][0] + "\' " +
+            headerss + contentUrl);
+          _this.curlMode = curltable;
+        } else {
+          /* d data 非头部附带数据,只用于非get类型请求 */
+          let curlData = " -d \'  ";
+          console.log()
+          reqdata=(typeof reqdata!='string')?reqdata:JSON.parse(reqdata);
+          for (let i in reqdata) {
+            curlData += i + "=" + JSON.stringify(reqdata[i]) + "&";
+          }
+          curlData = curlData.slice(0, curlData.length - 1);
+          curlData += "\' ";
+          let curltable = ("curl -X " + _this.bycdaoCategory[this.countTo].name + contentType + curlAccept + headerss + (reqdata == '{}' ? "" : curlData) + contentUrl);
+          _this.curlMode = curltable;
+        }
+        this.resultShow = true;
+        /* 显示结果 */
+      },
+      ...mapMutations(['send']),
+    },
     props: ['bycdaoCategory', 'countTo', 'bg', 'leftDropDownBoxContent'],
     components: {FormFold}
-    }
+  }
 </script>
 <style>
 
