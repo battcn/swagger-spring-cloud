@@ -87,16 +87,16 @@
             <span style="border-right: 7px solid transparent;">参数值</span>
             <span>操作</span>
           </li>
-          <li class="parameter-content" v-for="(item,index) in InterfaceRequest">
+          <li  class="parameter-content"  v-for="(item,key) in InterfaceRequest">
             <input style="margin-top:10px;" class="parameter-checkbox" type="checkbox"
                    :checked="item.required||selectAll"/>
             <input :value="item.name" class="parameter-name" type="text"/>
             <!--<input  class="parameter-value" type="text"/>-->
             <div class="parameter-value">
-              <textarea v-if="(typeof JSON.parse(parameterValue))=='object'" style="height:auto;width:100%;" type="text">{{parameterValue}}</textarea>
-              <input v-else :value="parameterValue" type="text" style="width:100%;margin-top: 8px;" />
+              <textarea v-if="(typeof JSON.parse(parameterValue))=='object'" style="height:auto;width:100%;color: #858585;padding: 5px 9px;" type="text">{{parameterValue}}</textarea>
+              <input v-else v-model="parameterValue" type="text" style="width:100%;margin-top: 8px;" />
             </div>
-            <span class="parameter-operating">删除</span>
+            <span v-if="(typeof JSON.parse(parameterValue))!='object'" @click="item['show']=false"  class="parameter-operating">删除</span>
           </li>
         </ul>
       </div>
@@ -209,7 +209,6 @@
             result[i]['properties'] = this.formatRequest(parameters[i].schema.$ref);
           } else {
             result[i] = parameters[i];
-            //result[i]['properties']=parameters[i];
           }
         }
         return result;
@@ -231,6 +230,9 @@
       }
     },
     methods: {
+      deleteItem:function (key) {
+this.$delete(this.InterfaceRequest,key)
+      },
       formatterJson: function (text_value) {
         let res = "";
         for (let i = 0, j = 0, k = 0, ii, ele; i < text_value.length; i++) {//k:缩进，j:""个数
@@ -391,8 +393,8 @@
         }
         for (let i = 0, n = result.length; i < n; i++) {
           if (result[i][2]["in"] === "path") {
-//            url = url.replace("{" + result[i][0] + "}", result[i][1]);
-            url += "/" + result[i][1];
+            //url += "/" + result[i][1];
+            url=url.replace("{" + result[i][0] + "}", result[i][1]);
           } else {
             if (result[i][2]["in"] === "body") {
               bodyparams += JSON.stringify(result[i][1]);
@@ -415,13 +417,10 @@
           url: "http://" + _this.leftDropDownBoxContent.host + url,
           headerParams: headerParams,
           type: _this.bycdaoCategory[this.countTo].name,
-          data: reqdata
+          data: reqdata,
+          method:function () {_this.StitchingCurl(headerParams, jsonReqdata)}
         });
         // this.debugResponse=this.$store.state.debugRequest.data;
-        /* 冰洁curl口令 */
-        setTimeout(() => {
-          _this.StitchingCurl(headerParams, jsonReqdata);
-        }, 1000);
       },
       StitchingCurl: function (headerParams, reqdata) {
         let _this = this;
@@ -443,7 +442,6 @@
         } else {
           /* d data 非头部附带数据,只用于非get类型请求 */
           let curlData = " -d \'  ";
-          console.log()
           reqdata=(typeof reqdata!='string')?reqdata:JSON.parse(reqdata);
           for (let i in reqdata) {
             curlData += i + "=" + JSON.stringify(reqdata[i]) + "&";
@@ -534,7 +532,7 @@
 
   .result-content {
     border-top: 1px solid #EBEBEB;
-    padding-top: 40px;
+    padding-top: 15px;
   }
 
   .result-content > div {
@@ -819,5 +817,12 @@
     color: #89BF05;
     border-bottom: 1px solid transparent;
     border-bottom: 1px solid #FFFFFF;
+  }
+
+  .slide-fade-enter-active, .slide-fade-leave-active {
+    transition: all .5s;height:auto;
+  }
+  .slide-fade-enter, .slide-fade-leave-to{
+    opacity: 0;height:0;
   }
 </style>

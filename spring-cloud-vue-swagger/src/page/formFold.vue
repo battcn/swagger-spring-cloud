@@ -8,7 +8,7 @@
     <span class="table-td">{{item.in?item.in:""}}</span>
     <span class="table-td">{{(typeof item.required=='boolean')?item.required:""}}</span>
     </li>
-    <form-fold :depth="depth + 1" v-if="showChildren" v-for="(item,key) in properties"
+    <form-fold :depth="depth + 1" v-show="showChildren" v-for="(item,key) in properties"
                :item="item" :keyTo="key" :properties="item.properties">
     </form-fold>
   </div>
@@ -33,11 +33,11 @@
   }
 </script>
 <style>
-  .Children-enter-active, .Children-leave-active {
-    transition: opacity .5s;
+  .slide-fade-enter-active, .slide-fade-leave-active {
+    transition: all .5s;height:auto;
   }
-  .Children-enter, .Children-leave-to{
-    opacity: 0;
+  .slide-fade-enter, .slide-fade-leave-to{
+    opacity: 0;height:0;
   }
   /* 请求参数表格 */
   .table-tr {
