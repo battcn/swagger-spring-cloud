@@ -1,9 +1,9 @@
 <template>
   <div class="tree-menu">
     <div :style="indent" @click="toggleChildren">{{ item.description }}</div>
-    <tree-menu
+    <tree-menu :key="key"
       :depth="depth + 1" v-if="showChildren"
-      v-for="item in properties" :properties="item.properties" :item="item">
+      v-for="(item,key) in properties" :properties="item.properties" :item="item">
     </tree-menu>
   </div>
 </template>

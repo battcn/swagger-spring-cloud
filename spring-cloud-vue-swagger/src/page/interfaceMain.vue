@@ -819,10 +819,4 @@ this.$delete(this.InterfaceRequest,key)
     border-bottom: 1px solid #FFFFFF;
   }
 
-  .slide-fade-enter-active, .slide-fade-leave-active {
-    transition: all .5s;height:auto;
-  }
-  .slide-fade-enter, .slide-fade-leave-to{
-    opacity: 0;height:0;
-  }
 </style>

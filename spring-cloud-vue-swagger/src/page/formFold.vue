@@ -1,21 +1,24 @@
 <template xmlns="http://www.w3.org/1999/xhtml" xmlns:v-bind="http://www.w3.org/1999/xhtml">
   <div class="tree-menu">
+
     <li :class="{fontColor:properties}" @click="toggleChildren" class="table-tr">
-    <span :class="{fontRight:depth>0}" class="table-td">{{item.name?item.name:(keyTo?keyTo:"无")}}</span>
-    <span class="table-td">{{item.description?item.description:"无"}}</span>
-    <span class="table-td">{{item.type}}</span>
-    <span class="table-td">无</span>
-    <span class="table-td">{{item.in?item.in:""}}</span>
-    <span class="table-td">{{(typeof item.required=='boolean')?item.required:""}}</span>
+      <span :class="{fontRight:depth>0}" class="table-td">{{item.name?item.name:(keyTo?keyTo:"无")}}</span>
+      <span class="table-td">{{item.description?item.description:"无"}}</span>
+      <span class="table-td">{{item.type}}</span>
+      <span class="table-td">无</span>
+      <span class="table-td">{{item.in?item.in:""}}</span>
+      <span class="table-td">{{(typeof item.required=='boolean')?item.required:""}}</span>
     </li>
-    <form-fold :depth="depth + 1" v-show="showChildren" v-for="(item,key) in properties"
-               :item="item" :keyTo="key" :properties="item.properties">
-    </form-fold>
+    <transition-group name="slide-fade" tag="div">
+      <form-fold :key="key" :depth="depth + 1" v-show="showChildren" v-for="(item,key) in properties"
+                 :item="item" :keyTo="key" :properties="item.properties">
+      </form-fold>
+    </transition-group>
   </div>
 </template>
 <script>
   export default {
-    props: ['item', 'properties','keyTo','depth'],
+    props: ['item', 'properties', 'keyTo', 'depth'],
     name: 'form-fold',
     data() {
       return {showChildren: false}
@@ -34,11 +37,13 @@
 </script>
 <style>
   .slide-fade-enter-active, .slide-fade-leave-active {
-    transition: all .5s;height:auto;
+    transition: all .5s;
   }
-  .slide-fade-enter, .slide-fade-leave-to{
-    opacity: 0;height:0;
+
+  .slide-fade-enter, .slide-fade-leave-to {
+    opacity: 0;
   }
+
   /* 请求参数表格 */
   .table-tr {
     border-bottom: 1px solid #ddd;
@@ -70,8 +75,13 @@
   .table-td:last-child {
     border-right: 0;
   }
-  .table-tr .fontRight{
+
+  .table-tr .fontRight {
     text-align: right;
   }
-  .fontColor{cursor:pointer;    color: #4395ff;}
+
+  .fontColor {
+    cursor: pointer;
+    color: #4395ff;
+  }
 </style>
