@@ -30,11 +30,11 @@ public class StudentController {
         return student;
     }
 
-    @PutMapping
+    /*@PutMapping
     public Student put(@RequestBody Student student) {
         logger.info("students put ");
         return student;
-    }
+    }*/
 
     @DeleteMapping("/{id}")
     public int delete(@PathVariable("id") Integer id) {
