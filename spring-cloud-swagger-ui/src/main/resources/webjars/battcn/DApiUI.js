@@ -45,7 +45,7 @@
      *
      */
     DApiUI.paging = function (data) {
-        var menu = data[parseInt($(".bycdao-left .form-control").children('option:selected').attr('order'))];
+        var menu = data[parseInt($(".swagger-left .form-control").children('option:selected').attr('order'))];
         $.ajax({
             url: encodeURI(menu.location),
             dataType: "json",
@@ -53,8 +53,8 @@
             async: false,
             success: function (data) {
                 var menu = data;
-                $(".bycdao-category").html("");
-                $(".bycdao-category").append('<ul class="nav nav-list"><li><a href="javascript:" style="cursor:default;">接口</a></li></ul>');
+                $(".swagger-category").html("");
+                $(".swagger-category").append('<ul class="nav nav-list"><li><a href="javascript:" style="cursor:default;">接口</a></li></ul>');
                 /*  判断是否必须 */
                 console.info(menu);
                 DApiUI.definitions(menu);
@@ -72,7 +72,7 @@
      * 创建面板
      */
     DApiUI.creatabTab = function (url) {
-        var tabIndexLi = $(".bycdao-header #tabIndex >li");
+        var tabIndexLi = $(".swagger-header #tabIndex >li");
         /* 遍历判断当前已经存在的tab页中是否有当前点击的url */
         for (var i = 0, n = tabIndexLi.size(); i < n; i++) {
             if (tabIndexLi.eq(i).find("a").text() == url) {
@@ -81,7 +81,7 @@
         }
         /* 增加选项卡 */
         var i = tabIndexLi.size() + 1;
-        $(".bycdao-header #tabIndex").append('<li class="tabIndex' + i + '"><a href="#tabIndex' + i + '" data-toggle="tab">' + url + '</a><b></b></li>');
+        $(".swagger-header #tabIndex").append('<li class="tabIndex' + i + '"><a href="#tabIndex' + i + '" data-toggle="tab">' + url + '</a><b></b></li>');
 
         var tabsContainer = $('<div id="tabIndex' + i + '" class="tabs-container tab-pane active" style="width:99%;margin:0 auto;"></div>');
         var ul = $('<ul class="nav nav-tabs" style="position:fixed;z-index:99;top:64px;"></ul>');
@@ -157,7 +157,7 @@
         div.addClass("tab-pane active").attr("id", "home").append(table);
         //内容覆盖
         DApiUI.getDoc().html("");
-        //$(".bycdao-header #tabIndex li:eq(0) a").tab('show');
+        //$(".swagger-header #tabIndex li:eq(0) a").tab('show');
         DApiUI.getDoc().append(div);
         DApiUI.getDoc().data("data", menu);
     };
@@ -239,7 +239,7 @@
                     DApiUI.bgArray()[children.methodType.toLowerCase()] ? childrenLi.css({"backgroundColor": DApiUI.bgArray()[children.methodType.toLowerCase()]}) : "";
                     ul.append(childrenLi);
                 });
-                $(".bycdao-category").append(ul);
+                $(".swagger-category").append(ul);
                 DApiUI.getMenu().append(li);
             }
         });
@@ -301,7 +301,7 @@
      */
     DApiUI.initLiClick = function () {
         /*DApiUI.getMenu() */
-        $(".bycdao-category").find(".menuLi").bind("click", function (e) {
+        $(".swagger-category").find(".menuLi").bind("click", function (e) {
             e.preventDefault();
             var that = $(this);
             var data = that.data("data");
@@ -1109,18 +1109,18 @@
 
         /*tab页操作 */
         if (!isNaN(elName)) {
-            $(".bycdao-header #tabIndex li").eq(elName).find("a").tab('show');
+            $(".swagger-header #tabIndex li").eq(elName).find("a").tab('show');
             return false;
         }
         DApiUI.getDoc().find("#" + elName[0] + " #tab" + elName[1]).html("");
 
         DApiUI.getDoc().find("#" + elName[0] + " #tab" + elName[1]).append(table);
-        $(".bycdao-header #tabIndex").find("." + elName[0] + ">a").tab('show');
+        $(".swagger-header #tabIndex").find("." + elName[0] + ">a").tab('show');
         /* 对删除按钮进行事件绑定 */
-        $(".bycdao-header #tabIndex li b").on("click", function () {
+        $(".swagger-header #tabIndex li b").on("click", function () {
             var id = $(this).prev("a").attr("href");
             $(id + "").remove();
-            $(this).parents("." + id.replace('#', '')).remove().hasClass("active") ? $(".bycdao-header #tabIndex> li:eq(0) >a").tab('show') : '';
+            $(this).parents("." + id.replace('#', '')).remove().hasClass("active") ? $(".swagger-header #tabIndex> li:eq(0) >a").tab('show') : '';
         })
         return elName;
     };

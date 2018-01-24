@@ -1,36 +1,39 @@
 <template xmlns:v-bind="http://www.w3.org/1999/xhtml">
-  <div class="bycdao-main">
+  <div class="swagger-main">
     <div class="switch">
       <span style="cursor:pointer;" @click="switchA=0" :class="[switchA==0?'active':'']">接口说明</span>
       <span style="cursor:pointer;" @click="switchA=1" :class="[switchA==1?'active':'']">在线调试</span>
     </div>
-    <div v-show="switchA==0" style="" class="bycdao-content">
+    <div v-show="switchA==0" style="" class="swagger-content">
       <ul class="content-list" style="">
         <li><span>接口url</span>
-          <!--<div><span>{{bycdaoCategory[0]?bycdaoCategory[0].pathName:''}}</span></div>-->
+          <!--<div><span>{{swaggerCategory[0]?swaggerCategory[0].pathName:''}}</span></div>-->
           <div>
-            <span>{{bycdaoCategory[countTo]&&bycdaoCategory[countTo].pathName?bycdaoCategory[countTo].pathName:""}}</span>
+            <span>{{swaggerCategory[countTo] && swaggerCategory[countTo].pathName ? swaggerCategory[countTo].pathName : ""}}</span>
           </div>
         </li>
         <li><span>接口名称</span>
-          <div><span>{{bycdaoCategory[countTo]&&bycdaoCategory[countTo].pathInfo?bycdaoCategory[countTo].pathInfo.summary:""}}</span>
+          <div>
+            <span>{{swaggerCategory[countTo] && swaggerCategory[countTo].pathInfo ? swaggerCategory[countTo].pathInfo.summary : ""}}</span>
           </div>
         </li>
         <li><span>请求方式</span>
-          <div><span>{{bycdaoCategory[countTo]?bycdaoCategory[countTo].name:""}}</span></div>
+          <div><span>{{swaggerCategory[countTo] ? swaggerCategory[countTo].name : ""}}</span></div>
         </li>
         <li><span>consumes</span>
-          <div><span>{{bycdaoCategory[countTo]&&bycdaoCategory[countTo].pathInfo&&bycdaoCategory[countTo].pathInfo.consumes?bycdaoCategory[countTo].pathInfo.consumes[0]:""}}</span>
+          <div>
+            <span>{{swaggerCategory[countTo] && swaggerCategory[countTo].pathInfo && swaggerCategory[countTo].pathInfo.consumes ? swaggerCategory[countTo].pathInfo.consumes[0] : ""}}</span>
           </div>
         </li>
         <li><span>produces</span>
-          <div><span>{{bycdaoCategory[countTo]&&bycdaoCategory[countTo].pathInfo&&bycdaoCategory[countTo].pathInfo.produces?bycdaoCategory[countTo].pathInfo.produces[0]:""}}</span>
+          <div>
+            <span>{{swaggerCategory[countTo] && swaggerCategory[countTo].pathInfo && swaggerCategory[countTo].pathInfo.produces ? swaggerCategory[countTo].pathInfo.produces[0] : ""}}</span>
           </div>
         </li>
         <li><span>请求参数</span>
           <div>
             <div class="request-table"
-                 v-if="bycdaoCategory[countTo]&&bycdaoCategory[countTo].pathInfo&&bycdaoCategory[countTo].pathInfo.parameters">
+                 v-if="swaggerCategory[countTo]&&swaggerCategory[countTo].pathInfo&&swaggerCategory[countTo].pathInfo.parameters">
               <ul>
                 <li class="table-tr table-head">
                   <span class="table-td">参数名称</span>
@@ -60,7 +63,7 @@
               <li v-for="(item,index) in InterfaceResponse">
                 <span>{{index}}</span>
                 <span>{{item.type}}</span>
-                <span>{{item.description?item.description:"无"}}</span>
+                <span>{{item.description ? item.description : "无"}}</span>
               </li>
             </ul>
           </div>
@@ -70,16 +73,16 @@
     <div v-show="switchA==1" class="debugging-content">
       <div class="content-url">
         <span
-          :style="{backgroundColor:bg[bycdaoCategory&&bycdaoCategory[countTo]&&bycdaoCategory[countTo].name.toUpperCase()]}">{{bycdaoCategory[countTo]&&bycdaoCategory[countTo].name?bycdaoCategory[countTo].name.toUpperCase():""}}</span>
+          :style="{backgroundColor:bg[swaggerCategory&&swaggerCategory[countTo]&&swaggerCategory[countTo].name.toUpperCase()]}">{{swaggerCategory[countTo] && swaggerCategory[countTo].name ? swaggerCategory[countTo].name.toUpperCase() : ""}}</span>
         <div>
           <input
-            v-bind:value="(bycdaoCategory[countTo]&&bycdaoCategory[countTo].pathName)?bycdaoCategory[countTo].pathName:''"
+            v-bind:value="(swaggerCategory[countTo]&&swaggerCategory[countTo].pathName)?swaggerCategory[countTo].pathName:''"
             style="width:100%;height: 23px;line-height: 23px;" type="text"/>
         </div>
         <button type="button" @click="getForm">发送</button>
       </div>
       <div class="content-parameter"
-           v-if="bycdaoCategory[countTo]&&bycdaoCategory[countTo].pathInfo&&bycdaoCategory[countTo].pathInfo.parameters">
+           v-if="swaggerCategory[countTo]&&swaggerCategory[countTo].pathInfo&&swaggerCategory[countTo].pathInfo.parameters">
         <ul>
           <li class="parameter-head">
             <input style="margin-top:10px;" type="checkbox" @click="selectAll=!selectAll"/>
@@ -87,16 +90,19 @@
             <span style="border-right: 7px solid transparent;">参数值</span>
             <span>操作</span>
           </li>
-          <li  class="parameter-content"  v-for="(item,key) in InterfaceRequest">
+          <li class="parameter-content" v-for="(item,key) in InterfaceRequest">
             <input style="margin-top:10px;" class="parameter-checkbox" type="checkbox"
                    :checked="item.required||selectAll"/>
             <input :value="item.name" class="parameter-name" type="text"/>
             <!--<input  class="parameter-value" type="text"/>-->
             <div class="parameter-value">
-              <textarea v-if="(typeof JSON.parse(parameterValue))=='object'" style="height:auto;width:100%;color: #858585;padding: 5px 9px;" type="text">{{parameterValue}}</textarea>
-              <input v-else  :value="parameterValue"  type="text" style="width:100%;margin-top: 8px;" />
+              <textarea v-if="(typeof JSON.parse(parameterValue))=='object'"
+                        style="height:auto;width:100%;color: #858585;padding: 5px 9px;"
+                        type="text">{{parameterValue}}</textarea>
+              <input v-else :value="parameterValue" type="text" style="width:100%;margin-top: 8px;"/>
             </div>
-            <span v-if="(typeof JSON.parse(parameterValue))!='object'" @click="item['show']=false"  class="parameter-operating">删除</span>
+            <span v-if="(typeof JSON.parse(parameterValue))!='object'" @click="item['show']=false"
+                  class="parameter-operating">删除</span>
           </li>
         </ul>
       </div>
@@ -128,9 +134,10 @@
               <li><span>date</span><span></span></li>
               <li><span>transfer-encoding</span><span></span></li>
               <li><span>x-application-context</span><span></span></li>
-              <li><span>content-type</span><span>{{debugResponse&&debugResponse.headers&&debugResponse.headers['map']&&debugResponse.headers['map']['content-type']&&debugResponse.headers['map']['content-type'][0]}}</span>
+              <li>
+                <span>content-type</span><span>{{debugResponse && debugResponse.headers && debugResponse.headers['map'] && debugResponse.headers['map']['content-type'] && debugResponse.headers['map']['content-type'][0]}}</span>
               </li>
-              <li><span>response-code</span><span>{{debugResponse&&debugResponse.status}}</span></li>
+              <li><span>response-code</span><span>{{debugResponse && debugResponse.status}}</span></li>
             </ul>
           </div>
           <div class="debugging-curl" v-show="debugging=='curl'">
@@ -154,7 +161,7 @@
     },
     computed: {
       InterfaceResponse: function () {
-        let resp = this.deepCopy(this.bycdaoCategory[this.countTo] && this.bycdaoCategory[this.countTo].pathInfo && this.bycdaoCategory[this.countTo].pathInfo.responses);
+        let resp = this.deepCopy(this.swaggerCategory[this.countTo] && this.swaggerCategory[this.countTo].pathInfo && this.swaggerCategory[this.countTo].pathInfo.responses);
         let respBasis = false;
         let respState;
         for (let key in resp) {
@@ -191,7 +198,7 @@
               if (schema.hasOwnProperty("type")) {
                 $('.jsonData').html("")
                 $('.jsonData').html(schema["type"])
-                this.parameterValue=this.basicTypeInit(schema["type"])
+                this.parameterValue = this.basicTypeInit(schema["type"])
                 return schema["type"];
               }
               return "无";
@@ -201,7 +208,7 @@
       },
       InterfaceRequest: function () {
         let result = {};
-        let parameters = this.deepCopy(this.bycdaoCategory[this.countTo].pathInfo.parameters);
+        let parameters = this.deepCopy(this.swaggerCategory[this.countTo].pathInfo.parameters);
         let definitions = this.deepCopy(this.leftDropDownBoxContent.definitions);
         for (let i in parameters) {
           if (parameters[i].schema && parameters[i].schema.$ref) {
@@ -357,11 +364,11 @@
         var parameterContent = document.getElementsByClassName("parameter-content");
         for (var i = 0, n = parameterContent.length; i < n; i++) {
           var option = parameterContent[i].children[0];
-          if (this.bycdaoCategory[this.countTo].pathInfo.parameters[i].required == true && !parameterContent[i].children[0].checked) {
+          if (this.swaggerCategory[this.countTo].pathInfo.parameters[i].required == true && !parameterContent[i].children[0].checked) {
             _this.$emit('PromptPopUpShow', parameterContent[i].children[1].value + "为必选字段")
             return false;
           }
-          let inputEle=$(parameterContent[i].children[2]).find("textarea")[0]?$(parameterContent[i].children[2]).find("textarea"):$(parameterContent[i].children[2]).find("input")
+          let inputEle = $(parameterContent[i].children[2]).find("textarea")[0] ? $(parameterContent[i].children[2]).find("textarea") : $(parameterContent[i].children[2]).find("input")
           if (option.checked) {
             if (inputEle.val().trim().length == 0) {
               _this.$emit('PromptPopUpShow', parameterContent[i].children[1].value + "不能为空")
@@ -369,8 +376,8 @@
             }
             var obj = [];
             obj.push(parameterContent[i].children[1].value);
-            obj.push(inputEle[0].type=='text'?inputEle.val():JSON.parse(inputEle.val()))
-            obj.push(_this.bycdaoCategory[_this.countTo].pathInfo.parameters[i])
+            obj.push(inputEle[0].type == 'text' ? inputEle.val() : JSON.parse(inputEle.val()))
+            obj.push(_this.swaggerCategory[_this.countTo].pathInfo.parameters[i])
             result.push(obj);
           }
         }
@@ -378,7 +385,7 @@
       },
       stitchUrl: function (result) {
         let _this = this;
-        let url = (_this.bycdaoCategory && _this.bycdaoCategory[_this.countTo] && _this.bycdaoCategory[_this.countTo].pathName) ? _this.bycdaoCategory[_this.countTo].pathName : '',
+        let url = (_this.swaggerCategory && _this.swaggerCategory[_this.countTo] && _this.swaggerCategory[_this.countTo].pathName) ? _this.swaggerCategory[_this.countTo].pathName : '',
           params = {},
           headerParams = "",
           reqdata = "",
@@ -391,7 +398,7 @@
         for (let i = 0, n = result.length; i < n; i++) {
           if (result[i][2]["in"] === "path") {
             //url += "/" + result[i][1];
-            url=url.replace("{" + result[i][0] + "}", result[i][1]);
+            url = url.replace("{" + result[i][0] + "}", result[i][1]);
           } else {
             if (result[i][2]["in"] === "body") {
               bodyparams += JSON.stringify(result[i][1]);
@@ -413,9 +420,11 @@
         this.$store.commit('send', {
           url: "http://" + _this.leftDropDownBoxContent.host + url,
           headerParams: headerParams,
-          type: _this.bycdaoCategory[this.countTo].name,
+          type: _this.swaggerCategory[this.countTo].name,
           data: reqdata,
-          method:function () {_this.StitchingCurl(headerParams, jsonReqdata)}
+          method: function () {
+            _this.StitchingCurl(headerParams, jsonReqdata)
+          }
         });
         // this.debugResponse=this.$store.state.debugRequest.data;
       },
@@ -431,21 +440,21 @@
         /* 头部数据 */
         headerss != "" ? headerss = " --header \'" + headerss + "\' " : "";
         let contentType = " --header \'Content-Type:  " + _this.debugResponse.headers['map']['content-type'][0] + "\' "
-        if (_this.bycdaoCategory[this.countTo].name.toLowerCase() == 'get') {
-          let curltable = ("curl -X " + _this.bycdaoCategory[this.countTo].name +
-            " --header \'Accept:  " + _this.debugResponse.headers['map']['content-type'][0] + "\' " +
-            headerss + contentUrl);
+        if (_this.swaggerCategory[this.countTo].name.toLowerCase() == 'get') {
+          let curltable = ("curl -X " + _this.swaggerCategory[this.countTo].name +
+          " --header \'Accept:  " + _this.debugResponse.headers['map']['content-type'][0] + "\' " +
+          headerss + contentUrl);
           _this.curlMode = curltable;
         } else {
           /* d data 非头部附带数据,只用于非get类型请求 */
           let curlData = " -d \'  ";
-          reqdata=(typeof reqdata!='string')?reqdata:JSON.parse(reqdata);
+          reqdata = (typeof reqdata != 'string') ? reqdata : JSON.parse(reqdata);
           for (let i in reqdata) {
             curlData += i + "=" + JSON.stringify(reqdata[i]) + "&";
           }
           curlData = curlData.slice(0, curlData.length - 1);
           curlData += "\' ";
-          let curltable = ("curl -X " + _this.bycdaoCategory[this.countTo].name + contentType + curlAccept + headerss + (reqdata == '{}' ? "" : curlData) + contentUrl);
+          let curltable = ("curl -X " + _this.swaggerCategory[this.countTo].name + contentType + curlAccept + headerss + (reqdata == '{}' ? "" : curlData) + contentUrl);
           _this.curlMode = curltable;
         }
         this.resultShow = true;
@@ -453,7 +462,7 @@
       },
       ...mapMutations(['send']),
     },
-    props: ['bycdaoCategory', 'countTo', 'bg', 'leftDropDownBoxContent'],
+    props: ['swaggerCategory', 'countTo', 'bg', 'leftDropDownBoxContent'],
     components: {FormFold}
   }
 </script>
@@ -725,7 +734,7 @@
   }
 
   /* 接口详细信息列表 */
-  .bycdao-content, .debugging-content {
+  .swagger-content, .debugging-content {
     border-top: 1px solid #dbdbdb;
     padding: 20px 10px;
   }
@@ -780,7 +789,7 @@
   }
 
   /*  接口详细内容 */
-  .bycdao-main {
+  .swagger-main {
     box-shadow: 1px 1px 5px #f3f4ef;
     border: 1px solid #F3F4EF;
     margin-left: 465px;

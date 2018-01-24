@@ -17,8 +17,9 @@
 </script>
 <style>
   .status-code {
-float:left;
+    float: left;
   }
+
   .code-list {
     margin: 0;
     padding: 0;
@@ -28,25 +29,32 @@ float:left;
     border-bottom: 1px solid #ddd;
     list-style: none;
   }
-  .code-list >.list-head{
+
+  .code-list > .list-head {
     font-weight: 700;
   }
+
   .code-list span {
     display: inline-block;
     padding: 8px;
   }
-  .code-list span:nth-child(1){
+
+  .code-list span:nth-child(1) {
     min-width: 46px;
-    border-right:1px solid #ddd;
-    margin-bottom: -1000px;padding-bottom: 1000px;
+    border-right: 1px solid #ddd;
+    margin-bottom: -1000px;
+    padding-bottom: 1000px;
   }
-  .code-list span:nth-child(2){
+
+  .code-list span:nth-child(2) {
 
   }
-  .code-list span:nth-child(3){
+
+  .code-list span:nth-child(3) {
     min-width: 62px;
     float: right;
-    border-left:1px solid #ddd;
-    margin-bottom: -1000px;padding-bottom: 1000px;
+    border-left: 1px solid #ddd;
+    margin-bottom: -1000px;
+    padding-bottom: 1000px;
   }
 </style>

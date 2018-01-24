@@ -2,12 +2,12 @@
   <div class="tree-menu">
 
     <li :class="{fontColor:properties}" @click="toggleChildren" class="table-tr">
-      <span :class="{fontRight:depth>0}" class="table-td">{{item.name?item.name:(keyTo?keyTo:"无")}}</span>
-      <span class="table-td">{{item.description?item.description:"无"}}</span>
+      <span :class="{fontRight:depth>0}" class="table-td">{{item.name ? item.name : (keyTo ? keyTo : "无")}}</span>
+      <span class="table-td">{{item.description ? item.description : "无"}}</span>
       <span class="table-td">{{item.type}}</span>
       <span class="table-td">无</span>
-      <span class="table-td">{{item.in?item.in:""}}</span>
-      <span class="table-td">{{(typeof item.required=='boolean')?item.required:""}}</span>
+      <span class="table-td">{{item.in ? item.in : ""}}</span>
+      <span class="table-td">{{(typeof item.required == 'boolean') ? item.required : ""}}</span>
     </li>
     <transition-group name="slide-fade" tag="div">
       <form-fold :key="key" :depth="depth + 1" v-show="showChildren" v-for="(item,key) in properties"

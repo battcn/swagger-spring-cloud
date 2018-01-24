@@ -1,9 +1,10 @@
 <template>
-  <div v-show="control" class="popUps" >
+  <div v-show="control" class="popUps">
     <div>
       <h2 style="color: #c94e50;"><strong>{{hint}}</strong></h2>
       <div>
-        <button @click="control=false" style="padding: 1em 2em;outline: none;font-weight: 600;border: none;color: #fff;background: #c94e50;">
+        <button @click="control=false"
+                style="padding: 1em 2em;outline: none;font-weight: 600;border: none;color: #fff;background: #c94e50;">
           close
         </button>
       </div>
@@ -13,11 +14,11 @@
 <script>
   export default {
     name: "app",
-    props:['control','hint']
+    props: ['control', 'hint']
   }
 </script>
 <style>
-  .popUps{
+  .popUps {
     /*position: fixed;*/
     /*top: 0;*/
     /*left: 0;*/
@@ -35,7 +36,8 @@
     /*opacity: 0;*/
     transition: opacity 0.3s;
   }
-  .popUps >div{
+
+  .popUps > div {
     width: 50%;
     max-width: 560px;
     min-width: 290px;
@@ -44,7 +46,8 @@
     text-align: center;
     position: absolute;
     z-index: 5;
-    left: 50%; top: 50%;
+    left: 50%;
+    top: 50%;
     transform: translate(-50%, -50%);
   }
 </style>
