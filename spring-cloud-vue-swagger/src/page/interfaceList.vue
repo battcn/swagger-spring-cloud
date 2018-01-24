@@ -4,7 +4,7 @@
       <ul class="nav-list">
         <select class="form-control" v-model.lazy="selected">
           <option v-for="(item,index) in bycdaoLeftHead" :value="index">
-            {{index===0?"default:":""}}{{item.swaggerResources[0].location}}
+            {{index===0?"default:":""}}{{item.serviceInstances&&item.serviceInstances[0]&&item.serviceInstances[0].serviceId}}
           </option>
         </select>
         <li v-for="(item,index) in leftDropDownBoxContent.tags" @click="count=index"
@@ -13,7 +13,7 @@
           <span class="navList-name">{{item.name}}</span>
           <span class="navList-description">{{item.description}}</span>
           <!--<span class="navList-number">{{Object.keys(leftDropDownBoxContent.paths[Object.keys(leftDropDownBoxContent.paths)[index]]).length}}</span>-->
-          <span class="navList-number">{{bycdaoCategory.length}}</span>
+          <span class="navList-number">{{quantity[item.name]}}</span>
         </li>
       </ul>
     </div>
@@ -56,6 +56,7 @@
         countTo: 0,
         control: false,
         hint: "",
+        quantity:{},
         bg: {"GET": '#D1EAFF', "POST": '#D1FED3', "PATCH": '#FFE2D2', "DELETE": '#FFD1D1', "PUT": "#F0E0CA"}
       }
     },
@@ -88,12 +89,14 @@
       },
       bycdaoCategory() {
         let current = [];
+        this.quantity={}
         for (let i in this.leftDropDownBoxContent.paths){
           for (let n in this.leftDropDownBoxContent.paths[i]) {
             let count = this.leftDropDownBoxContent.paths[i][n].tags[0];
             /* 判断当前数据的name是否与当前激活的接口tags一致:后台接口数据顺序与前台显示不一致，需要通过name判断
              * 对name一致的进行保存
               * */
+            this.quantity[count] ? this.$set(this.quantity,count,this.quantity[count]+1): this.$set(this.quantity,count,1);
             if (count == this.leftDropDownBoxContent.tags[this.count].name) {
 //              current.push([i, n, this.leftDropDownBoxContent.paths[i][n], this.leftDropDownBoxContent]);
               current.push({pathName:i,name:n,pathInfo:this.leftDropDownBoxContent.paths[i][n]})
@@ -151,7 +154,7 @@
 
   /* select及其下方的接口宽度样式 */
   .bycdao-left {
-    width: 230px;
+    width: 240px;
     margin-top: 0px;
     position: fixed;
     height: 100%;
@@ -225,8 +228,8 @@
   /* 接口列表 */
   .bycdao-category {
     padding: 0;
-    margin-left: 230px;
-    width: 220px;
+    margin-left: 240px;
+    width: 225px;
     margin-top: 0px;
     position: fixed;
     /* background: #337ab7; */

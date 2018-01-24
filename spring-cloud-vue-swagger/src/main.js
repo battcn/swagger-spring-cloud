@@ -5,7 +5,6 @@ import App from './App'
 import router from './router'
 import store from './store/index'
 Vue.config.productionTip = false
-import text from './test/text.vue'
 
 /* eslint-disable no-new */
 new Vue({

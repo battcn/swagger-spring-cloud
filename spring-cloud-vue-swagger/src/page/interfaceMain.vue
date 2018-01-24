@@ -94,7 +94,7 @@
             <!--<input  class="parameter-value" type="text"/>-->
             <div class="parameter-value">
               <textarea v-if="(typeof JSON.parse(parameterValue))=='object'" style="height:auto;width:100%;color: #858585;padding: 5px 9px;" type="text">{{parameterValue}}</textarea>
-              <input v-else v-model="parameterValue" type="text" style="width:100%;margin-top: 8px;" />
+              <input v-else  :value="parameterValue"  type="text" style="width:100%;margin-top: 8px;" />
             </div>
             <span v-if="(typeof JSON.parse(parameterValue))!='object'" @click="item['show']=false"  class="parameter-operating">删除</span>
           </li>
@@ -230,9 +230,6 @@
       }
     },
     methods: {
-      deleteItem:function (key) {
-this.$delete(this.InterfaceRequest,key)
-      },
       formatterJson: function (text_value) {
         let res = "";
         for (let i = 0, j = 0, k = 0, ii, ele; i < text_value.length; i++) {//k:缩进，j:""个数
@@ -372,7 +369,7 @@ this.$delete(this.InterfaceRequest,key)
             }
             var obj = [];
             obj.push(parameterContent[i].children[1].value);
-            obj.push(JSON.parse(inputEle.val()))
+            obj.push(inputEle[0].type=='text'?inputEle.val():JSON.parse(inputEle.val()))
             obj.push(_this.bycdaoCategory[_this.countTo].pathInfo.parameters[i])
             result.push(obj);
           }
@@ -786,7 +783,7 @@ this.$delete(this.InterfaceRequest,key)
   .bycdao-main {
     box-shadow: 1px 1px 5px #f3f4ef;
     border: 1px solid #F3F4EF;
-    margin-left: 470px;
+    margin-left: 465px;
     margin-right: 15px;
     transition: all 0.2s;
   }
