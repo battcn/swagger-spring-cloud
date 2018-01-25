@@ -5,18 +5,18 @@
     <parent>
         <artifactId>spring-cloud-swagger</artifactId>
         <groupId>com.battcn</groupId>
-        <version>1.0.0-RELEASE</version>
+        <version>1.0.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <packaging>pom</packaging>
     <modules>
         <module>spring-cloud-swagger-eureka</module>
-        <module>spring-cloud-swagger-service1</module>
-        <module>spring-cloud-swagger-service2</module>
-        <module>spring-cloud-swagger-service3</module>
+        <module>spring-cloud-swagger-service6</module>
+        <module>spring-cloud-swagger-service7</module>
+        <module>spring-cloud-swagger-service8</module>
     </modules>
     <artifactId>spring-cloud-swagger-sample-eureka</artifactId>
-    <version>1.0.0-RELEASE</version>
+    <version>1.0.1-SNAPSHOT</version>
 
     <developers>
         <developer>

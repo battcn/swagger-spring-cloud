@@ -5,12 +5,12 @@
     <parent>
         <artifactId>spring-cloud-swagger-sample-eureka</artifactId>
         <groupId>com.battcn</groupId>
-        <version>1.0.0-RELEASE</version>
+        <version>1.0.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>spring-cloud-swagger-service6</artifactId>
-    <version>1.0.0-RELEASE</version>
+    <version>1.0.1-SNAPSHOT</version>
 
 
     <dependencies>
@@ -30,7 +30,7 @@
         <dependency>
             <groupId>com.battcn</groupId>
             <artifactId>spring-cloud-swagger-client</artifactId>
-            <version>1.0.0-RELEASE</version>
+            <version>1.0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.cloud</groupId>
