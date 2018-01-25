@@ -20,7 +20,7 @@ const  leftDropDownBoxContent={
 }
 /* 初始化:获取单选框数据， */
 function init() {
-  Vue.http.get('http://localhost:8803/cloud-swagger-resources').then((response)=>{
+  Vue.http.get(process.env.SWAGGER_URL).then((response)=>{
     dropDown.state.data=response.body;
     return true;
   },(response)=>{
