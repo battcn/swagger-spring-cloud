@@ -5,6 +5,7 @@ import com.battcn.swagger.model.ServiceResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
@@ -19,6 +20,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import springfox.documentation.swagger.web.SwaggerResource;
 
+import java.awt.print.Book;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
@@ -73,10 +75,18 @@ public class SwaggerController {
 
             for (ServiceResponse response : serviceResponses) {
                 try {
-                    List<SwaggerResource> swaggerResourceArrayList = Lists.newArrayList();
                     String body = response.getResponse().getBody();
-                    List<SwaggerResource> swaggerResources = objectMapper.readValue(body, new TypeReference<List<SwaggerResource>>() {
-                    });
+                    List<SwaggerResource> swaggerResources;
+                    // 代表是XML,需要走XML解析
+                    if (response.getResponse().getHeaders().getContentType().isCompatibleWith(MediaType.APPLICATION_XML)) {
+                        XmlMapper xmlMapper = new XmlMapper();
+                        swaggerResources = xmlMapper.readValue(body, new TypeReference<List<SwaggerResource>>() {
+                        });
+                    } else {
+                        swaggerResources = objectMapper.readValue(body, new TypeReference<List<SwaggerResource>>() {
+                        });
+                    }
+                    List<SwaggerResource> swaggerResourceArrayList = Lists.newArrayList();
                     for (SwaggerResource swaggerResource : swaggerResources) {
                         swaggerResource.setName(swaggerResource.getName());
                         swaggerResource.setLocation(response.getServiceInstance().getUri() + swaggerResource.getLocation());
