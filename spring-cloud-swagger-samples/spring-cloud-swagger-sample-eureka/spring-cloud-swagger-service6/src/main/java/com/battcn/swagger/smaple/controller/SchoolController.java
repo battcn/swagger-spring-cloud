@@ -19,7 +19,7 @@ public class SchoolController {
     private static final Logger logger = LoggerFactory.getLogger(SchoolController.class);
 
     @ApiOperation("查询学校信息")
-    @GetMapping
+    @GetMapping("/get")
     public String get() {
         logger.info("schools get ");
         return "{name:\"school\"}";
