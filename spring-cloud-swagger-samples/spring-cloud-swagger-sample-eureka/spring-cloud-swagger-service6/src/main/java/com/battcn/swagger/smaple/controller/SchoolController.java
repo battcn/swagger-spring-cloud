@@ -2,6 +2,7 @@ package com.battcn.swagger.smaple.controller;
 
 import com.battcn.swagger.smaple.entity.School;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +18,7 @@ public class SchoolController {
 
     private static final Logger logger = LoggerFactory.getLogger(SchoolController.class);
 
-
+    @ApiOperation("查询学校信息")
     @GetMapping
     public String get() {
         logger.info("schools get ");
