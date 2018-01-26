@@ -756,17 +756,16 @@
   .content-list > li > span {
     display: inline-block;
     width: 108px;
-    padding: 8px;
+    padding: 12px 8px 8px;
   }
 
   .content-list > li > div {
     margin-left: 125px;
-    padding: 8px;
+    padding: 12px;
   }
 
   .content-list > li > div > span {
     display: inline-block;
-    padding: 8px;
   }
 
   .content-list > li > div .request-table {
@@ -792,7 +791,7 @@
   .swagger-main {
     box-shadow: 1px 1px 5px #f3f4ef;
     border: 1px solid #F3F4EF;
-    margin-left: 465px;
+    margin-left: 47%;
     margin-right: 15px;
     transition: all 0.2s;
   }

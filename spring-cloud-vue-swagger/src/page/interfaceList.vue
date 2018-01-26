@@ -4,12 +4,11 @@
       <ul class="nav-list">
         <select class="form-control" v-model.lazy="selected">
           <option v-for="(item,index) in swaggerLeftHead" :value="index">
-            {{index === 0 ? "default:" : ""}}{{item.serviceInstances && item.serviceInstances[0] && item.serviceInstances[0].serviceId}}
+            {{item.serviceInstances && item.serviceInstances[0] && item.serviceInstances[0].serviceId}}
           </option>
         </select>
         <li v-for="(item,index) in leftDropDownBoxContent.tags" @click="count=index"
             v-bind:class="[count==index ? 'active' : '']">
-          <i class="fa fa-file-text"></i>
           <span class="navList-name">{{item.name}}</span>
           <span class="navList-description">{{item.description}}</span>
           <!--<span class="navList-number">{{Object.keys(leftDropDownBoxContent.paths[Object.keys(leftDropDownBoxContent.paths)[index]]).length}}</span>-->
@@ -156,7 +155,7 @@
 
   /* select及其下方的接口宽度样式 */
   .swagger-left {
-    width: 240px;
+    width: 21%;
     margin-top: 0px;
     position: fixed;
     height: 100%;
@@ -179,7 +178,6 @@
 
   .nav-list > li {
     display: block;
-    padding: 0;
     margin: 0;
     border: 0;
     height: 56px;
@@ -187,6 +185,8 @@
     position: relative;
     border-left: 5px solid #fff;
     cursor: pointer;
+    text-align: left;
+    padding:0 0 0 10%;
   }
 
   .nav-list > li:hover, .nav-list > li.active {
@@ -195,11 +195,7 @@
     border-left: 5px solid #8ABF00;
   }
 
-  .nav-list .fa {
-    float: left;
-    line-height: 56px;
-    margin-left: 18px;
-  }
+
 
   /* 第一层接口列表名字 */
   .navList-name {
@@ -230,8 +226,8 @@
   /* 接口列表 */
   .swagger-category {
     padding: 0;
-    margin-left: 240px;
-    width: 225px;
+    margin-left: 21%;
+    width: 26%;
     margin-top: 0px;
     position: fixed;
     /* background: #337ab7; */
@@ -241,7 +237,7 @@
 
   .swagger-category .categoryLi {
     text-align: left;
-    margin-bottom: 10px;
+    margin-bottom: 5px;
     padding: 5px 10px;
   }
 
