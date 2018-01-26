@@ -26,6 +26,11 @@
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-xml</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
             <groupId>com.battcn</groupId>
             <artifactId>spring-cloud-swagger-ui</artifactId>
             <version>${project.parent.version}</version>
