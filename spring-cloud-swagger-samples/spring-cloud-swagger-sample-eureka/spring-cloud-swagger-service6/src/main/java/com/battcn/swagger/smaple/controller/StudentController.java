@@ -24,6 +24,13 @@ public class StudentController {
         return "{name:\"battcn\"}";
     }
 
+    @GetMapping("/query")
+    public String query(@RequestParam String name, @RequestParam String email) {
+        logger.info("students get ");
+        return "{name:\"battcn\"}";
+    }
+
+
     @PostMapping
     public Student post(@RequestBody Student student) {
         logger.info("students post ");
