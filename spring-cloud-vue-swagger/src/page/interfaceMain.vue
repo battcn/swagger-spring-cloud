@@ -94,14 +94,13 @@
             <input style="margin-top:10px;" class="parameter-checkbox" type="checkbox"
                    :checked="item.required||selectAll"/>
             <input :value="item.name" class="parameter-name" type="text"/>
-            <!--<input  class="parameter-value" type="text"/>-->
             <div class="parameter-value">
-              <textarea v-if="(typeof JSON.parse(parameterValue))=='object'"
+              <textarea rows="10" v-if="parameterValue!=''&&(typeof JSON.parse(parameterValue))=='object'"
                         style="height:auto;width:100%;color: #858585;padding: 5px 9px;"
                         type="text">{{parameterValue}}</textarea>
               <input v-else :value="parameterValue" type="text" style="width:100%;margin-top: 8px;"/>
             </div>
-            <span v-if="(typeof JSON.parse(parameterValue))!='object'" @click="item['show']=false"
+            <span v-if="parameterValue==''||(typeof JSON.parse(parameterValue))!='object'" @click="item['show']=false"
                   class="parameter-operating">删除</span>
           </li>
         </ul>
@@ -117,12 +116,12 @@
         <div class="result-content">
           <div v-show="debugging=='content'">
             <ul v-if="(typeof debugResponse.bodyText)=='object'">
-              <li v-for="item in debugResponse.bodyText">
+              <li v-for="item in JSON.parse(debugResponse.bodyText)">
                 <span>{{item}}</span>
               </li>
             </ul>
             <li v-else>
-              <span>{{debugResponse.bodyText}}</span>
+              <span style="white-space: pre-wrap;" v-text="debugResponse&&debugResponse.bodyText?formatterJson(debugResponse.bodyText):''"></span>
             </li>
           </div>
           <div v-show="debugging=='cookies'">
@@ -791,7 +790,7 @@
   .swagger-main {
     box-shadow: 1px 1px 5px #f3f4ef;
     border: 1px solid #F3F4EF;
-    margin-left: 47%;
+    margin-left: 43%;
     margin-right: 15px;
     transition: all 0.2s;
   }

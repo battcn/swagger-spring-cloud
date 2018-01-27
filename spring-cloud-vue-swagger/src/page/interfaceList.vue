@@ -23,6 +23,7 @@
           <!--:style="{backgroundColor:bg[item[1].toUpperCase()]}"-->
           <!--<span class="categoryLi-type">{{key?key.toUpperCase():""}}</span>-->
           <span class="categoryLi-type">{{item.name ? item.name.toUpperCase() : ""}}</span>
+          <code class="categoryLi-path">{{item.pathName ? item.pathName.toLowerCase() : ""}}</code>
           <span class="categoryLi-name">{{item.pathInfo && item.pathInfo.summary ? item.pathInfo.summary : ""}}</span>
         </li>
       </ul>
@@ -83,6 +84,7 @@
     components: {interfaceMain},
     computed: {
       swaggerLeftHead() {
+
         return this.$store.state.swaggerLeftHead.data
       },
       leftDropDownBoxContent() {
@@ -227,7 +229,7 @@
   .swagger-category {
     padding: 0;
     margin-left: 21%;
-    width: 26%;
+    width: 22%;
     margin-top: 0px;
     position: fixed;
     /* background: #337ab7; */
@@ -242,11 +244,17 @@
   }
 
   .categoryLi .categoryLi-type {
-    display: block;
     height: 20px;
     line-height: 20px;
   }
-
+  .categoryLi .categoryLi-path{
+    padding: 2px 4px;
+    font-size: 90%;
+    color: #c7254e;
+    white-space: nowrap;
+    background-color: #f9f2f4;
+    border-radius: 4px;
+  }
   .categoryLi .categoryLi-name {
     display: block;
     height: 20px;
