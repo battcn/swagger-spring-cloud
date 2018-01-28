@@ -394,11 +394,14 @@
             url = _this.leftDropDownBoxContent.basePath + url;
           }
         }
+        let isQuery=false;
         for (let i = 0, n = result.length; i < n; i++) {
           if (result[i][2]["in"] === "path") {
             //url += "/" + result[i][1];
             url = url.replace("{" + result[i][0] + "}", result[i][1]);
-          } else {
+          } else if(result[i][2]["in"] ==="query"){
+            url+=((isQuery?'&':isQuery=true&&'?')+result[i][0]+'='+result[i][1]);
+          } else{
             if (result[i][2]["in"] === "body") {
               bodyparams += JSON.stringify(result[i][1]);
             } else {
@@ -440,7 +443,7 @@
         headerss != "" ? headerss = " --header \'" + headerss + "\' " : "";
         let contentType = " --header \'Content-Type:  " + _this.debugResponse.headers['map']['content-type'][0] + "\' "
         if (_this.swaggerCategory[this.countTo].name.toLowerCase() == 'get') {
-          let curltable = ("curl -X " + _this.swaggerCategory[this.countTo].name +
+          let curltable = ("curl -X " + _this.swaggerCategory[this.countTo].name.toUpperCase() +
           " --header \'Accept:  " + _this.debugResponse.headers['map']['content-type'][0] + "\' " +
           headerss + contentUrl);
           _this.curlMode = curltable;
@@ -453,7 +456,7 @@
           }
           curlData = curlData.slice(0, curlData.length - 1);
           curlData += "\' ";
-          let curltable = ("curl -X " + _this.swaggerCategory[this.countTo].name + contentType + curlAccept + headerss + (reqdata == '{}' ? "" : curlData) + contentUrl);
+          let curltable = ("curl -X " + _this.swaggerCategory[this.countTo].name.toUpperCase()  + contentType + curlAccept + headerss + (reqdata == '{}' ? "" : curlData) + contentUrl);
           _this.curlMode = curltable;
         }
         this.resultShow = true;
@@ -755,12 +758,12 @@
   .content-list > li > span {
     display: inline-block;
     width: 108px;
-    padding: 12px 8px 8px;
+    padding: 10px 8px 8px;
   }
 
   .content-list > li > div {
     margin-left: 125px;
-    padding: 12px;
+    padding: 10px;
   }
 
   .content-list > li > div > span {
