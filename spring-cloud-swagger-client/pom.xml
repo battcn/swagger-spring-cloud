@@ -12,7 +12,7 @@
 
     <name>spring-cloud-swagger-client</name>
     <url>https://github.com/battcn/spring-cloud-swagger.git</url>
-    <description>如不需UI,直接依赖client即可</description>
+    <description>扫描服务</description>
 
     <dependencies>
         <dependency>
