@@ -11,7 +11,6 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -60,12 +59,6 @@ public class StudentController {
         logger.info("students post ");
         return student;
     }
-
-    /*@PutMapping
-    public Student put(@RequestBody Student student) {
-        logger.info("students put ");
-        return student;
-    }*/
 
     @DeleteMapping("/{id}")
     public int delete(@PathVariable("id") Integer id) {
