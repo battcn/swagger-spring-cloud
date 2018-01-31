@@ -30,19 +30,6 @@
     </div>
     <interfaceMain v-on:PromptPopUpShow="PromptPopUpShow" v-bind:leftDropDownBoxContent="leftDropDownBoxContent"
                    v-bind:bg="bg" v-bind:swaggerCategory="swaggerCategory" v-bind:countTo="countTo"></interfaceMain>
-    <transition name="fade">
-      <div v-show="control" class="popUps">
-        <div>
-          <h2 style="color: #c94e50;"><strong>{{hint}}</strong></h2>
-          <div>
-            <button @click="PromptPopUpHide"
-                    style="padding: 1em 2em;outline: none;font-weight: 600;border: none;color: #fff;background: #c94e50;">
-              close
-            </button>
-          </div>
-        </div>
-      </div>
-    </transition>
   </div>
 </template>
 <script type="text/ecmascript-6">
@@ -72,12 +59,7 @@
     },
     methods: {
       PromptPopUpShow: function (hint) {
-        this.hint = hint;
-        this.control = true;
-      },
-      PromptPopUpHide: function () {
-        this.hint = "";
-        this.control = false;
+        this.$layer.msg(hint, {time: 2})
       },
       ...mapMutations(['switch']),
     },
@@ -121,40 +103,6 @@
     opacity: 0;
   }
 
-  /* 提示弹窗 */
-  .popUps {
-    /*position: fixed;*/
-    /*top: 0;*/
-    /*left: 0;*/
-    /*bottom: 0;*/
-    /*right: 0;*/
-    align-items: center;
-    justify-content: center;
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-    z-index: 1;
-    background: rgba(55, 58, 71, 0.9);
-    /*opacity: 0;*/
-    transition: opacity 0.3s;
-  }
-
-  .popUps > div {
-    width: 50%;
-    max-width: 560px;
-    min-width: 290px;
-    background: #fff;
-    padding: 4em;
-    text-align: center;
-    position: absolute;
-    z-index: 5;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-  }
-
   /* select及其下方的接口宽度样式 */
   .swagger-left {
     width: 21%;
@@ -167,10 +115,12 @@
   /* 单选框 */
   .form-control {
     display: block;
-    width: 80%;
-    margin: 0 auto 10px;
+    width: 86%;
+    margin: 8px auto;
     padding: 4px 6px;
     height: 36px;
+    border: 0px;
+    border-bottom: 1px solid #555;
   }
 
   .nav-list {
@@ -188,7 +138,7 @@
     border-left: 5px solid #fff;
     cursor: pointer;
     text-align: left;
-    padding:0 0 0 10%;
+    padding:0 0 0 5%;
   }
 
   .nav-list > li:hover, .nav-list > li.active {
@@ -260,5 +210,8 @@
     height: 20px;
     line-height: 20px;
   }
-
+  .notify .notify-msg {
+    height: auto;
+    max-width: 260px;
+  }
 </style>
