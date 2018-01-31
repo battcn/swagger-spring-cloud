@@ -14,7 +14,7 @@ spring:
         - 10.0
 eureka:
   instance:
-    hostname: localhost 	#配置主机名
+    hostname: localhost   	#配置主机名
   client:
     #配置服务注册中心是否以自己为客户端进行注册(配置false)
     register-with-eureka: false
