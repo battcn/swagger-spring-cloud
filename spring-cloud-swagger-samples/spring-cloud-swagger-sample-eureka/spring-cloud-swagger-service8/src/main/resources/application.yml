@@ -14,7 +14,7 @@ spring:
         - 10.0
 eureka:
   instance:
-    hostname:  192.168.11.59
+    hostname:  localhost
     prefer-ip-address: true
     instance-id: ${spring.cloud.client.ipAddress}:${server.port}
   client:
