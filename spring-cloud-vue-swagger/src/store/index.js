@@ -29,7 +29,6 @@ function init() {
   }).then((a)=> {
     if(a&&dropDown.state.data[dropDown.state.count]&&dropDown.state.data[dropDown.state.count]['swaggerResources']&&dropDown.state.data[dropDown.state.count].swaggerResources[0]&&dropDown.state.data[dropDown.state.count].swaggerResources[0].location){
       /* dropDown.state.data[0]控制当前是第几个接口 */
-      // swaggerLeftContent.state.data=dropDown.state.data[0].swaggerResources[0]
       Vue.http.get(dropDown.state.data[dropDown.state.count].swaggerResources[0].location).then((response)=>{
         leftDropDownBoxContent.state.data=response.body;
         return true;
