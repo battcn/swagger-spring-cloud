@@ -14,7 +14,9 @@ spring:
         - 10.0
 eureka:
   instance:
-    hostname: localhost 	#配置主机名
+    hostname:  192.168.11.59
+    prefer-ip-address: true
+    instance-id: ${spring.cloud.client.ipAddress}:${server.port}
   client:
     service-url:
       defaultZone: http://${eureka.instance.hostname}:8761/eureka/
