@@ -95,12 +95,12 @@
                    :checked="item.required||selectAll"/>
             <input :value="item.name" class="parameter-name" type="text"/>
             <div class="parameter-value">
-              <textarea rows="10" v-if="parameterValue!=''&&(typeof JSON.parse(parameterValue))=='object'"
+              <textarea rows="10" v-if="parameterValue[key]!=''&&(typeof parameterValue[key])=='object'"
                         style="height:auto;width:100%;color: #858585;padding: 5px 9px;"
-                        type="text">{{parameterValue}}</textarea>
-              <input v-else :value="parameterValue" type="text" style="width:100%;margin-top: 8px;"/>
+                        type="text">{{parameterValue[key]}}</textarea>
+              <input v-else :value="parameterValue[key]" type="text" style="width:100%;margin-top: 8px;"/>
             </div>
-            <span v-if="parameterValue==''||(typeof JSON.parse(parameterValue))!='object'" @click="item['show']=false"
+            <span v-if="parameterValue[key]==''||(typeof parameterValue[key])!='object'"
                   class="parameter-operating">删除</span>
           </li>
         </ul>
@@ -114,15 +114,8 @@
               :class="[debugging=='header'?'active':'']">Header</span>
         <span style="cursor:pointer;" @click="debugging='curl'" :class="[debugging=='curl'?'active':'']">curl方式</span>
         <div class="result-content">
-          <div v-show="debugging=='content'">
-            <ul v-if="(typeof debugResponse.bodyText)=='object'">
-              <li v-for="item in JSON.parse(debugResponse.bodyText)">
-                <span>{{item}}</span>
-              </li>
-            </ul>
-            <li v-else>
-              <span style="white-space: pre-wrap;" v-text="debugResponse&&debugResponse.bodyText?formatterJson(debugResponse.bodyText):''"></span>
-            </li>
+          <div class="content" v-show="debugging=='content'">
+            <li></li>
           </div>
           <div v-show="debugging=='cookies'">
             <span>暂无</span>
@@ -156,10 +149,10 @@
   export default {
     name: "app",
     data() {
-      return {switchA: 0, resultShow: false, debugging: 'content', selectAll: false, curlMode: "", parameterValue: ""}
+      return {switchA: 0, resultShow: false, debugging: 'content', selectAll: false, curlMode: "", parameterValue: {}}
     },
     computed: {
-      InterfaceResponse: function () {
+      InterfaceResponse: function () {/* 响应参数 */
         let resp = this.deepCopy(this.swaggerCategory[this.countTo] && this.swaggerCategory[this.countTo].pathInfo && this.swaggerCategory[this.countTo].pathInfo.responses);
         let respBasis = false;
         let respState;
@@ -190,14 +183,12 @@
               }
               deftion = this.JSONinit(refType);
               $('.jsonData').JSONView(deftion);
-              this.parameterValue = this.formatterJson(JSON.stringify(deftion));
               return definition;
             } else {
               //未发现ref属性
               if (schema.hasOwnProperty("type")) {
                 $('.jsonData').html("")
                 $('.jsonData').html(schema["type"])
-                this.parameterValue = this.basicTypeInit(schema["type"])
                 return schema["type"];
               }
               return "无";
@@ -206,6 +197,7 @@
         }
       },
       InterfaceRequest: function () {
+        /* 请求参数的遍历 */
         let result = {};
         let parameters = this.deepCopy(this.swaggerCategory[this.countTo].pathInfo.parameters);
         let definitions = this.deepCopy(this.leftDropDownBoxContent.definitions);
@@ -217,25 +209,45 @@
             result[i] = parameters[i];
           }
         }
+        let resultCopy= this.deepCopy(result);
+        for(let key in resultCopy){
+
+          /* 如果该字段没有type属性且存在子字段，子字段内有类型type属性 */
+          if(!resultCopy[key].type&&resultCopy[key].properties&&resultCopy[key].properties.type=="object"){
+            /* 包含子字段 */
+            this.parameterValue[key]={};
+            this.parameterValue[key][resultCopy[key].name]=this.iniObject(resultCopy[key].properties.properties);
+          }else{
+            /* 不包含子字段 */
+            this.parameterValue[key]=this.basicTypeInit(resultCopy[key].type);
+          }
+        }
         return result;
       },
-      debugResponse() {
+      debugResponse() {/* 从请求中获取到的响应参数 */
         return this.$store.state.debugRequest.debugResponse;
       }
     },
     watch: {
       countTo: function () {
-//        this.curlMode="";
         this.switchA = 0;
-//        this.debugResponse&&this.debugResponse.bodyText?this.debugResponse.bodyText="":"";
-//        this.debugResponse&&this.debugResponse.headers&&
-//        this.debugResponse.headers['map']&&this.debugResponse.headers['map']['content-type']&&
-//        this.debugResponse.headers['map']['content-type'][0]?
-//          this.debugResponse.headers['map']['content-type'][0]="":"";
         this.resultShow = false;
       }
     },
     methods: {
+      iniObject:function (properties) {/* 传入对象，对其进行类型初始化 */
+        let obj={}
+        for(let key in properties){
+          if(properties[key].type&&properties[key].properties&&properties[key].type=="object"){
+            /* 包含子字段 */
+            obj[key]=this.iniObject(properties[key].properties)
+          }else{
+            /* 不包含子字段 */
+            obj[key]=this.basicTypeInit(properties[key].type)
+          }
+        }
+        return obj;
+      },
       formatterJson: function (text_value) {
         let res = "";
         for (let i = 0, j = 0, k = 0, ii, ele; i < text_value.length; i++) {//k:缩进，j:""个数
@@ -289,7 +301,7 @@
         }
         return result;
       },
-      basicTypeInit: function (type) {
+      basicTypeInit: function (type) {/* 传入参数类型名字，返回该类型初始化的值 */
         if (type == 'integer' || type == 'number') {
           return 0;
         }
@@ -459,6 +471,17 @@
           let curltable = ("curl -X " + _this.swaggerCategory[this.countTo].name.toUpperCase()  + contentType + curlAccept + headerss + (reqdata == '{}' ? "" : curlData) + contentUrl);
           _this.curlMode = curltable;
         }
+        /* 响应内容JSON序列化 */
+          try {
+            let obj=JSON.parse(this.debugResponse.bodyText);
+            if(typeof obj == 'object' && obj ){
+              $(".result-content .content li").JSONView(new String(this.debugResponse.bodyText))
+            }else{
+              $(".result-content .content li").html(this.debugResponse.bodyText)
+            }
+          } catch(e) {
+            $(".result-content .content li").html(this.debugResponse.bodyText)
+          }
         this.resultShow = true;
         /* 显示结果 */
       },

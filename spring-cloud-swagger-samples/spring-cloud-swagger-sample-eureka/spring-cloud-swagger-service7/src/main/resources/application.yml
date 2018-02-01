@@ -16,7 +16,7 @@ spring:
     base-package: com.battcn
 eureka:
   instance:
-    hostname:  192.168.11.59
+    hostname:  localhost
     prefer-ip-address: true
   client:
     service-url:

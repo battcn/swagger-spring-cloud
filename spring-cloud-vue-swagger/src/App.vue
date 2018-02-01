@@ -8,7 +8,6 @@
 
 <script type="text/ecmascript-6">
   import 'normalize.css'
-  import 'font-awesome/css/font-awesome.css'
   import list from './page/interfaceList.vue'
   import interfaceMain from './page/interfaceMain.vue';
   export default {
