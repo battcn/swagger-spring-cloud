@@ -1,9 +1,8 @@
 <template xmlns="http://www.w3.org/1999/xhtml" xmlns:v-bind="http://www.w3.org/1999/xhtml">
   <div class="tree-menu">
-
     <li :class="{fontColor:properties}" @click="toggleChildren" class="table-tr">
       <span :class="{fontRight:depth>0}" class="table-td">{{item.name ? item.name : (keyTo ? keyTo : "无")}}</span>
-      <span class="table-td">{{item.description ? item.description : "无"}}</span>
+      <span class="table-td">{{item.description ? item.description :"无"}}</span>
       <span class="table-td">{{item.type}}</span>
       <span class="table-td">无</span>
       <span class="table-td">{{item.in ? item.in : ""}}</span>

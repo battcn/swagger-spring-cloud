@@ -77,7 +77,7 @@
         <div>
           <input
             v-bind:value="(swaggerCategory[countTo]&&swaggerCategory[countTo].pathName)?swaggerCategory[countTo].pathName:''"
-            style="width:100%;height: 23px;line-height: 23px;" type="text"/>
+            style="width:100%;height: 23px;line-height: 23px;" type="text" />
         </div>
         <button type="button" @click="getForm">发送</button>
       </div>
@@ -98,7 +98,7 @@
               <textarea rows="10" v-if="parameterValue[key]!=''&&(typeof parameterValue[key])=='object'"
                         style="height:auto;width:100%;color: #858585;padding: 5px 9px;"
                         type="text">{{parameterValue[key]}}</textarea>
-              <input v-else :value="parameterValue[key]" type="text" style="width:100%;margin-top: 8px;"/>
+              <input v-else v-model="parameterValue[key]"  type="text" style="width:100%;margin-top: 8px;"/>
             </div>
             <span v-if="parameterValue[key]==''||(typeof parameterValue[key])!='object'"
                   class="parameter-operating">删除</span>
@@ -202,21 +202,27 @@
         let parameters = this.deepCopy(this.swaggerCategory[this.countTo].pathInfo.parameters);
         let definitions = this.deepCopy(this.leftDropDownBoxContent.definitions);
         for (let i in parameters) {
-          if (parameters[i].schema && parameters[i].schema.$ref) {
+          if ((parameters[i].schema && parameters[i].schema.$ref)||parameters[i].$ref) {
             result[i] = parameters[i];
-            result[i]['properties'] = this.formatRequest(parameters[i].schema.$ref);
+            result[i]['properties'] = this.formatRequest(parameters[i].schema.$ref||parameters[i].$ref);
           } else {
             result[i] = parameters[i];
           }
         }
         let resultCopy= this.deepCopy(result);
         for(let key in resultCopy){
-
           /* 如果该字段没有type属性且存在子字段，子字段内有类型type属性 */
-          if(!resultCopy[key].type&&resultCopy[key].properties&&resultCopy[key].properties.type=="object"){
+          if((!resultCopy[key].type&&resultCopy[key].properties&&resultCopy[key].properties.type=="object")||resultCopy[key].type=='array'&&resultCopy[key].properties){
             /* 包含子字段 */
-            this.parameterValue[key]={};
-            this.parameterValue[key][resultCopy[key].name]=this.iniObject(resultCopy[key].properties.properties);
+            if(resultCopy[key].type=='array'&&resultCopy[key].properties){
+              this.parameterValue[key]=[];
+              this.parameterValue[key].push(this.iniObject(resultCopy[key].properties.properties))
+            }else{
+              this.parameterValue[key]={}
+              this.parameterValue[key]=this.iniObject(resultCopy[key].properties.properties);
+            }
+
+//            this.parameterValue[key][resultCopy[key].name]=this.iniObject(resultCopy[key].properties.properties);
           }else{
             /* 不包含子字段 */
             this.parameterValue[key]=this.basicTypeInit(resultCopy[key].type);
@@ -238,9 +244,14 @@
       iniObject:function (properties) {/* 传入对象，对其进行类型初始化 */
         let obj={}
         for(let key in properties){
-          if(properties[key].type&&properties[key].properties&&properties[key].type=="object"){
+          if((properties[key].type&&properties[key].properties&&properties[key].type=="object")||(properties[key].type=='array'&&properties[key].properties)){
             /* 包含子字段 */
-            obj[key]=this.iniObject(properties[key].properties)
+            if(properties[key].type=='array'&&properties[key].properties){
+              obj[key]={};
+              obj[key]=(Object.values(this.iniObject(properties[key].properties)))
+            }else{
+              obj[key]=this.iniObject(properties[key].properties)
+            }
           }else{
             /* 不包含子字段 */
             obj[key]=this.basicTypeInit(properties[key].type)
@@ -282,7 +293,17 @@
             let properties = definitions[key].properties
             for (let k in properties) {
               if ((properties[k].items && properties[k].items.$ref) || properties[k].$ref) {
-                (properties[k].items && properties[k].items.$ref) ? result.properties[k] = this.formatRequest(properties[k].items.$ref) : (properties[k].$ref ? result.properties[k] = this.formatRequest(properties[k].$ref) : "")
+                let Ref=(properties[k].items && properties[k].items.$ref)?(properties[k].items && properties[k].items.$ref):properties[k].$ref
+                if(properties[k].type == 'array'){
+                  result.properties[k].properties=[];
+                  let adds=this.formatRequest(Ref);
+                  adds.name?"":adds['name']=Ref.match("#/definitions/(.*)")[1].toLowerCase();
+                  result.properties[k].properties.push(adds);
+                  continue;
+                }
+              //  result.properties[k].properties={};
+               // result.properties[k].properties[Ref.match("#/definitions/(.*)")[1].toLowerCase()]=this.formatRequest(Ref);
+                result.properties[k]=this.formatRequest(Ref);
               } else {
                 result.properties[k] = properties[k];
               }
@@ -310,6 +331,9 @@
         }
         if (type == 'string') {
           return ""
+        }
+        if (type == 'array') {
+          return []
         }
       },
       JSONinit: function (refType) {
