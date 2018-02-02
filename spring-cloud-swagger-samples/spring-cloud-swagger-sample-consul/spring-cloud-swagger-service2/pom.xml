@@ -5,12 +5,12 @@
     <parent>
         <groupId>com.battcn</groupId>
         <artifactId>spring-cloud-swagger-sample-consul</artifactId>
-        <version>1.0.1-RELEASE</version>
+        <version>1.0.2-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>spring-cloud-swagger-service2</artifactId>
-    <version>1.0.1-RELEASE</version>
+    <version>1.0.2-SNAPSHOT</version>
 
 
     <dependencies>
@@ -26,7 +26,7 @@
         <dependency>
             <groupId>com.battcn</groupId>
             <artifactId>spring-cloud-swagger-client</artifactId>
-            <version>1.0.1-RELEASE</version>
+            <version>1.0.2-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
