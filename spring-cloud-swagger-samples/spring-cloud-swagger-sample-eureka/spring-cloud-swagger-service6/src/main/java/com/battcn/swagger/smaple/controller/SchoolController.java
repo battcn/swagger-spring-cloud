@@ -26,7 +26,7 @@ public class SchoolController {
     }
 
     @PostMapping
-    public School post(@RequestBody School school) {
+    public School post(@RequestHeader String token, @RequestBody School school) {
         logger.info("schools post ");
         return school;
     }
