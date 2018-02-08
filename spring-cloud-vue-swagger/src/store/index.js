@@ -56,6 +56,7 @@ const debugRequest={
     }
   }
 }
+/* 公共模块，功能性方法 */
 
 export default new Vuex.Store({
   modules:{

@@ -1,4 +1,4 @@
-<template xmlns:v-bind="http://www.w3.org/1999/xhtml">
+<template xmlns:v-bind="http://www.w3.org/1999/xhtml" xmlns:v-on="">
   <div class="swagger-main">
     <div class="switch">
       <span style="cursor:pointer;" @click="switchA=0" :class="[switchA==0?'active':'']">接口说明</span>
@@ -79,32 +79,10 @@
             v-bind:value="(swaggerCategory[countTo]&&swaggerCategory[countTo].pathName)?swaggerCategory[countTo].pathName:''"
             style="width:100%;height: 23px;line-height: 23px;" type="text" />
         </div>
-        <button type="button" @click="getForm">发送</button>
+        <button type="submit" @click="getForm">发送</button>
       </div>
-      <div class="content-parameter"
-           v-if="swaggerCategory[countTo]&&swaggerCategory[countTo].pathInfo&&swaggerCategory[countTo].pathInfo.parameters">
-        <ul>
-          <li class="parameter-head">
-            <input style="margin-top:10px;" type="checkbox" @click="selectAll=!selectAll"/>
-            <span>参数名称</span>
-            <span style="border-right: 7px solid transparent;">参数值</span>
-            <span>操作</span>
-          </li>
-          <li class="parameter-content" v-for="(item,key) in InterfaceRequest">
-            <input style="margin-top:10px;" class="parameter-checkbox" type="checkbox"
-                   :checked="item.required||selectAll"/>
-            <input :value="item.name" class="parameter-name" type="text"/>
-            <div class="parameter-value">
-              <textarea rows="10" v-if="parameterValue[key]!=''&&(typeof parameterValue[key])=='object'"
-                        style="height:auto;width:100%;color: #858585;padding: 5px 9px;"
-                        type="text">{{parameterValue[key]}}</textarea>
-              <input v-else v-model="parameterValue[key]"  type="text" style="width:100%;margin-top: 8px;"/>
-            </div>
-            <span v-if="parameterValue[key]==''||(typeof parameterValue[key])!='object'"
-                  class="parameter-operating">删除</span>
-          </li>
-        </ul>
-      </div>
+        <submit-form  :leftDropDownBoxContent="leftDropDownBoxContent"  v-if="swaggerCategory[countTo]&&swaggerCategory[countTo].pathInfo&&swaggerCategory[countTo].pathInfo.parameters"  :swaggerCategory="swaggerCategory" :countTo="countTo" :InterfaceRequest="InterfaceRequest">
+        </submit-form>
       <div class="debugging-result" v-show="resultShow">
       <span style="cursor:pointer;" @click="debugging='content'"
             :class="[debugging=='content'?'active':'']">响应内容</span>
@@ -145,15 +123,17 @@
 <script type="text/ecmascript-6">
   import {mapMutations} from 'vuex'
   import FormFold from './formFold.vue'
+  import {deepCopy,basicTypeInit} from './../util/util'
+  import SubmitForm from './submitForm.vue'
 
   export default {
     name: "app",
     data() {
-      return {switchA: 0, resultShow: false, debugging: 'content', selectAll: false, curlMode: "", parameterValue: {}}
+      return {s:false,switchA: 0, resultShow: false, debugging: 'content',  curlMode: "" ,parameterValue: {}}
     },
     computed: {
       InterfaceResponse: function () {/* 响应参数 */
-        let resp = this.deepCopy(this.swaggerCategory[this.countTo] && this.swaggerCategory[this.countTo].pathInfo && this.swaggerCategory[this.countTo].pathInfo.responses);
+        let resp = deepCopy(this.swaggerCategory[this.countTo] && this.swaggerCategory[this.countTo].pathInfo && this.swaggerCategory[this.countTo].pathInfo.responses);
         let respBasis = false;
         let respState;
         for (let key in resp) {
@@ -172,12 +152,12 @@
             if (regex.test(ref)) {
               let refType = RegExp.$1;
               let flag = false;
-              let definitionsArray = this.deepCopy(this.leftDropDownBoxContent && this.leftDropDownBoxContent.definitions);
+              let definitionsArray = deepCopy(this.leftDropDownBoxContent && this.leftDropDownBoxContent.definitions);
               let deftion = null;
               let definition = null;
               for (let i in definitionsArray) {
                 if (i === refType) {
-                  definition = this.deepCopy(definitionsArray[i].properties);
+                  definition = deepCopy(definitionsArray[i].properties);
                   break
                 }
               }
@@ -197,10 +177,13 @@
         }
       },
       InterfaceRequest: function () {
+        if(!this.swaggerCategory[this.countTo]&&this.swaggerCategory[this.countTo].pathInfo&&this.swaggerCategory[this.countTo].pathInfo.parameters){
+          return false;
+        }
         /* 请求参数的遍历 */
         let result = {};
-        let parameters = this.deepCopy(this.swaggerCategory[this.countTo].pathInfo.parameters);
-        let definitions = this.deepCopy(this.leftDropDownBoxContent.definitions);
+        let parameters = deepCopy(this.swaggerCategory[this.countTo].pathInfo.parameters);
+        let definitions = deepCopy(this.leftDropDownBoxContent.definitions);
         for (let i in parameters) {
           if ((parameters[i].schema && parameters[i].schema.$ref)||parameters[i].$ref) {
             result[i] = parameters[i];
@@ -209,7 +192,7 @@
             result[i] = parameters[i];
           }
         }
-        let resultCopy= this.deepCopy(result);
+        let resultCopy= deepCopy(result);
         for(let key in resultCopy){
           /* 如果该字段没有type属性且存在子字段，子字段内有类型type属性 */
           if((!resultCopy[key].type&&resultCopy[key].properties&&resultCopy[key].properties.type=="object")||resultCopy[key].type=='array'&&resultCopy[key].properties){
@@ -225,7 +208,7 @@
 //            this.parameterValue[key][resultCopy[key].name]=this.iniObject(resultCopy[key].properties.properties);
           }else{
             /* 不包含子字段 */
-            this.parameterValue[key]=this.basicTypeInit(resultCopy[key].type);
+            this.parameterValue[key]=basicTypeInit(resultCopy[key].type);
           }
         }
         return result;
@@ -241,6 +224,23 @@
       }
     },
     methods: {
+     /* isSelectAll:function (InterfaceRequest) {
+       let is=true;
+          for(let key in InterfaceRequest){
+            if(!InterfaceRequest[key].required){
+              is=false
+            }
+        }
+        this.s=is;
+      },*/
+      tickRequired:function (item,event) {
+        for(let key in this.InterfaceRequest){
+          if(!this.InterfaceRequest[key].required){
+            return false;
+          }
+        }
+        return true;
+      },
       iniObject:function (properties) {/* 传入对象，对其进行类型初始化 */
         let obj={}
         for(let key in properties){
@@ -254,7 +254,7 @@
             }
           }else{
             /* 不包含子字段 */
-            obj[key]=this.basicTypeInit(properties[key].type)
+            obj[key]=basicTypeInit(properties[key].type)
           }
         }
         return obj;
@@ -286,10 +286,10 @@
       formatRequest: function (itemsRef) {
         let objName = itemsRef.match("#/definitions/(.*)")[1];
         let result = {};
-        let definitions = this.deepCopy(this.leftDropDownBoxContent.definitions);
+        let definitions = deepCopy(this.leftDropDownBoxContent.definitions);
         for (let key in definitions) {
           if (key.toLowerCase() == objName.toLowerCase()) {
-            result = this.deepCopy(definitions[key]);
+            result =deepCopy(definitions[key]);
             let properties = definitions[key].properties
             for (let k in properties) {
               if ((properties[k].items && properties[k].items.$ref) || properties[k].$ref) {
@@ -315,30 +315,9 @@
       titleCase5: function (str) {
         return str.toLowerCase().replace(/( |^)[a-z]/g, (L) => L.toUpperCase());
       },
-      deepCopy: function (source) {
-        var result = {};
-        for (var key in source) {
-          result[key] = (typeof source[key] === 'object') ? this.deepCopy(source[key]) : source[key];
-        }
-        return result;
-      },
-      basicTypeInit: function (type) {/* 传入参数类型名字，返回该类型初始化的值 */
-        if (type == 'integer' || type == 'number') {
-          return 0;
-        }
-        if (type == 'boolean') {
-          return 'false'
-        }
-        if (type == 'string') {
-          return ""
-        }
-        if (type == 'array') {
-          return []
-        }
-      },
       JSONinit: function (refType) {
         let _this = this;
-        let definitionsArray = this.deepCopy(_this.leftDropDownBoxContent && _this.leftDropDownBoxContent.definitions);
+        let definitionsArray = deepCopy(_this.leftDropDownBoxContent && _this.leftDropDownBoxContent.definitions);
         let deftion = null;
         for (let i in definitionsArray) {
           if (i === refType) {
@@ -393,7 +372,8 @@
         }
         return deftion;
       },
-      getForm: function () {
+      getForm: function (e) {
+        e.preventDefault();
         var _this = this;
         var result = [];
         var parameterContent = document.getElementsByClassName("parameter-content");
@@ -422,7 +402,7 @@
         let _this = this;
         let url = (_this.swaggerCategory && _this.swaggerCategory[_this.countTo] && _this.swaggerCategory[_this.countTo].pathName) ? _this.swaggerCategory[_this.countTo].pathName : '',
           params = {},
-          headerParams = "",
+          headerParams = {},
           reqdata = "",
           bodyparams = "";
         if (typeof (_this.leftDropDownBoxContent.basePath) !== "undefined" && _this.leftDropDownBoxContent.basePath !== "") {
@@ -512,7 +492,7 @@
       ...mapMutations(['send']),
     },
     props: ['swaggerCategory', 'countTo', 'bg', 'leftDropDownBoxContent'],
-    components: {FormFold}
+    components: {FormFold,SubmitForm}
   }
 </script>
 <style>
@@ -657,78 +637,7 @@
   }
 
   /* 调试：附带参数列表 */
-  .content-parameter {
-    margin-bottom: 45px;
-    border-top: 1px solid #ddd;
-  }
 
-  .content-parameter li {
-    font-weight: 700;
-    border-bottom: 1px solid #ddd;
-    overflow: hidden;
-  }
-
-  .content-parameter .parameter-head {
-    overflow: hidden;
-  }
-
-  /* 首行单独样式 */
-  .parameter-head input {
-    width: 5%;
-    float: left;
-    height: 20px;
-    margin-top: 10px;
-  }
-
-  .parameter-head span {
-    width: 20%;
-    float: left;
-  }
-
-  .parameter-head span:nth-child(3) {
-    width: 48%;
-    float: left;
-    margin-left: 2%;
-    margin-right: 2%;
-  }
-
-  /* 非首行样式 */
-  .parameter-checkbox {
-    width: 5%;
-    float: left;
-    height: 20px;
-    margin-top: 10px;
-  }
-
-  /* 表格中的文字样式 */
-  .content-parameter li > span {
-    width: 20%;
-    text-align: left;
-    line-height: 40px;
-    float: left;
-  }
-
-  .content-parameter li > input {
-    margin-top: 8px;
-  }
-
-  .content-parameter .parameter-name {
-    width: 20%;
-    float: left;
-  }
-
-  .content-parameter li .parameter-value {
-    width: 48%;
-    float: left;
-    margin-left: 2%;
-    margin-right: 2%;
-  }
-
-  .content-parameter li .parameter-operating {
-    font-size: 14px;
-    cursor: pointer;
-    color: #40A8FF;
-  }
 
   /* 调试页面 */
   .content-url {
@@ -766,7 +675,7 @@
     font-family: inherit;
   }
 
-  .content-url > button {
+  .content-url > button{
     position: absolute;
     right: 0;
     top: 0;

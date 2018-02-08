@@ -7,7 +7,6 @@ import store from './store/index'
 import layer from 'vue-layer'
 
 Vue.prototype.$layer = layer(Vue);
-
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
