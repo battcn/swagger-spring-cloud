@@ -429,10 +429,13 @@
             }
           }
         }
-        if (result && result[0] && result[0][2] && result[0][2]["in"] && result[0][2]["in"] === "body") {
-          reqdata = bodyparams;
-        } else {
-          reqdata = params;
+        for(let j = 0, k = result.length; j < k; j++){
+          if (result && result[j] && result[j][2] && result[j][2]["in"] && result[j][2]["in"] === "body") {
+            reqdata = bodyparams;
+            break;
+          } else {
+            reqdata = params;
+          }
         }
         let jsonReqdata = reqdata;
         this.$store.commit('send', {
