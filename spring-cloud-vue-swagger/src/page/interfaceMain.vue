@@ -7,7 +7,6 @@
     <div v-show="switchA==0" style="" class="swagger-content">
       <ul class="content-list" style="">
         <li><span>接口url</span>
-          <!--<div><span>{{swaggerCategory[0]?swaggerCategory[0].pathName:''}}</span></div>-->
           <div>
             <span>{{swaggerCategory[countTo] && swaggerCategory[countTo].pathName ? swaggerCategory[countTo].pathName : ""}}</span>
           </div>
@@ -75,13 +74,14 @@
         <span
           :style="{backgroundColor:bg[swaggerCategory&&swaggerCategory[countTo]&&swaggerCategory[countTo].name.toUpperCase()]}">{{swaggerCategory[countTo] && swaggerCategory[countTo].name ? swaggerCategory[countTo].name.toUpperCase() : ""}}</span>
         <div>
-          <input
-            v-bind:value="(swaggerCategory[countTo]&&swaggerCategory[countTo].pathName)?swaggerCategory[countTo].pathName:''"
+          <input v-if="(typeof linkagePath)=='string'"  v-bind:value="linkagePath"
+                 style="width:100%;height: 23px;line-height: 23px;" type="text" />
+          <input v-else v-bind:value="linkagePath[0]+parameterValue[0]+linkagePath[1]"
             style="width:100%;height: 23px;line-height: 23px;" type="text" />
         </div>
         <button type="submit" @click="getForm">发送</button>
       </div>
-        <submit-form  :leftDropDownBoxContent="leftDropDownBoxContent"  v-if="swaggerCategory[countTo]&&swaggerCategory[countTo].pathInfo&&swaggerCategory[countTo].pathInfo.parameters"  :swaggerCategory="swaggerCategory" :countTo="countTo" :InterfaceRequest="InterfaceRequest">
+        <submit-form v-on:shijian="fatherValue" :linkageSection="linkageSection" :parameterValue="parameterValue"  :leftDropDownBoxContent="leftDropDownBoxContent"  v-if="swaggerCategory[countTo]&&swaggerCategory[countTo].pathInfo&&swaggerCategory[countTo].pathInfo.parameters"  :swaggerCategory="swaggerCategory" :countTo="countTo" :InterfaceRequest="InterfaceRequest">
         </submit-form>
       <div class="debugging-result" v-show="resultShow">
       <span style="cursor:pointer;" @click="debugging='content'"
@@ -129,7 +129,7 @@
   export default {
     name: "app",
     data() {
-      return {s:false,switchA: 0, resultShow: false, debugging: 'content',  curlMode: "" ,parameterValue: {}}
+      return {s:false,switchA: 0, resultShow: false, debugging: 'content',  curlMode: "" ,linkageSection:"",parameterValue: {}}
     },
     computed: {
       InterfaceResponse: function () {/* 响应参数 */
@@ -204,8 +204,6 @@
               this.parameterValue[key]={}
               this.parameterValue[key]=this.iniObject(resultCopy[key].properties.properties);
             }
-
-//            this.parameterValue[key][resultCopy[key].name]=this.iniObject(resultCopy[key].properties.properties);
           }else{
             /* 不包含子字段 */
             this.parameterValue[key]=basicTypeInit(resultCopy[key].type);
@@ -215,6 +213,17 @@
       },
       debugResponse() {/* 从请求中获取到的响应参数 */
         return this.$store.state.debugRequest.debugResponse;
+      },
+      linkagePath(){
+        let path=(this.swaggerCategory&&this.swaggerCategory[this.countTo]&&this.swaggerCategory[this.countTo].pathName)?this.swaggerCategory[this.countTo].pathName:"";
+        let digits=path.indexOf("{")
+        let digitsEnd=path.indexOf("}")
+        if(path!==undefined&&digits>0){
+          let linkageNoun=path.slice(digits+1,digitsEnd)
+          this.linkageSection=path.slice(digits+1,digitsEnd)
+          return [path.slice(0,digits+1),path.slice(digitsEnd)] ;
+        }
+        return path;
       }
     },
     watch: {
@@ -224,6 +233,11 @@
       }
     },
     methods: {
+      fatherValue:function (myValue) {
+        this.$set(this.parameterValue,0,myValue);
+        this.resultShow=!this.resultShow;
+        this.resultShow=!this.resultShow;
+      },
      /* isSelectAll:function (InterfaceRequest) {
        let is=true;
           for(let key in InterfaceRequest){
@@ -471,7 +485,11 @@
           let curlData = " -d \'  ";
           reqdata = (typeof reqdata != 'string') ? reqdata : JSON.parse(reqdata);
           for (let i in reqdata) {
-            curlData += i + "=" + JSON.stringify(reqdata[i]) + "&";
+            if(typeof reqdata[i]=='object'){
+              curlData += i + ":" + JSON.stringify(reqdata[i]) + "&";
+            }else{
+              curlData += i + "=" + JSON.stringify(reqdata[i]) + "&";
+            }
           }
           curlData = curlData.slice(0, curlData.length - 1);
           curlData += "\' ";
