@@ -1,7 +1,9 @@
 package com.battcn.swagger.smaple.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.battcn.swagger.properties.ApiDataType;
 import com.battcn.swagger.properties.ApiParamType;
+import com.battcn.swagger.smaple.entity.Address;
 import com.battcn.swagger.smaple.entity.RoleDto;
 import com.battcn.swagger.smaple.entity.Student;
 import com.google.common.collect.Lists;
@@ -13,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -36,9 +39,9 @@ public class StudentController {
     @GetMapping
     @ApiOperation(value = "角色列表 (DONE)")
     public String test1(@RequestParam(value = "page", defaultValue = "1") Integer pageNum,
-                                               @RequestParam(value = "page_size", defaultValue = "20") Integer pageSize,
-                                               @RequestParam(value = "roleName", required = false) String roleName,
-                                               @RequestParam(value = "active", required = false) Boolean active) {
+                        @RequestParam(value = "page_size", defaultValue = "20") Integer pageSize,
+                        @RequestParam(value = "roleName", required = false) String roleName,
+                        @RequestParam(value = "active", required = false) Boolean active) {
         return "哈哈";
     }
 
@@ -57,6 +60,7 @@ public class StudentController {
     @PostMapping
     public Student post(@RequestBody Student student) {
         logger.info("students post ");
+
         return student;
     }
 
@@ -70,5 +74,21 @@ public class StudentController {
     public int patch(@PathVariable("id") Integer id) {
         logger.info("students patch {}", id);
         return id;
+    }
+
+
+    public static void main(String[] args) {
+        Student student = new Student();
+        student.setId(1);
+        student.setClazz(new Long[]{1L, 2L});
+        List<Address> list = new ArrayList<>();
+        Address address = new Address();
+        address.setName("11");
+        address.setState(false);
+        list.add(address);
+        student.setAddresses(list);
+        System.out.println(JSON.toJSONString(student));
+
+
     }
 }
