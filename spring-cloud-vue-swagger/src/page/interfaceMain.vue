@@ -111,9 +111,7 @@
             </ul>
           </div>
           <div class="debugging-curl" v-show="debugging=='curl'">
-            <div>
-              {{curlMode}}
-            </div>
+            <div>{{curlMode}}</div>
           </div>
         </div>
       </div>
@@ -482,17 +480,7 @@
           _this.curlMode = curltable;
         } else {
           /* d data 非头部附带数据,只用于非get类型请求 */
-          let curlData = " -d \'  ";
-          reqdata = (typeof reqdata != 'string') ? reqdata : JSON.parse(reqdata);
-          for (let i in reqdata) {
-            if(typeof reqdata[i]=='object'){
-              curlData += i + ":" + JSON.stringify(reqdata[i]) + "&";
-            }else{
-              curlData += i + "=" + JSON.stringify(reqdata[i]) + "&";
-            }
-          }
-          curlData = curlData.slice(0, curlData.length - 1);
-          curlData += "\' ";
+          let curlData = " -d \'" + (reqdata?this.formatterJson(reqdata).replace(/[\r\n]/g," \\\n"):"")  + "\' ";
           let curltable = ("curl -X " + _this.swaggerCategory[this.countTo].name.toUpperCase()  + contentType + curlAccept + headerss + (reqdata == '{}' ? "" : curlData) + contentUrl);
           _this.curlMode = curltable;
         }
@@ -581,7 +569,7 @@
   .debugging-curl > div {
     color: #393939;
     font-size: 13px;
-    white-space: nowrap;
+    white-space: pre;
     overflow-x: auto;
     padding: 15px;
   }
