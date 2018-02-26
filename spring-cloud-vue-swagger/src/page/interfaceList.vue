@@ -132,13 +132,11 @@
     display: block;
     margin: 0;
     border: 0;
-    height: 56px;
-    line-height: 56px;
     position: relative;
     border-left: 5px solid #fff;
     cursor: pointer;
     text-align: left;
-    padding:0 0 0 5%;
+    padding:16px 0 16px 5%;
   }
 
   .nav-list > li:hover, .nav-list > li.active {
@@ -152,11 +150,12 @@
   /* 第一层接口列表名字 */
   .navList-name {
     margin-right: 14px;
+    float: left;
   }
 
   .navList-description {
-    padding-right: 40px;
-    width: 100px;
+
+    width: 172px;
     display: inline-block;
     text-align: left;
   }
