@@ -9,9 +9,6 @@ spring:
       ignored-interfaces:
         - docker0
         - veth.*
-      preferred-networks:
-        - 192.168
-        - 10.0
 eureka:
   instance:
     hostname:  localhost

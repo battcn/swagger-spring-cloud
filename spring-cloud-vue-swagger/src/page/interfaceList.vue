@@ -11,7 +11,6 @@
             v-bind:class="[count==index ? 'active' : '']">
           <span class="navList-name">{{item.name}}</span>
           <span class="navList-description">{{item.description}}</span>
-          <!--<span class="navList-number">{{Object.keys(leftDropDownBoxContent.paths[Object.keys(leftDropDownBoxContent.paths)[index]]).length}}</span>-->
           <span class="navList-number">{{quantity[item.name]}}</span>
         </li>
       </ul>
@@ -20,16 +19,14 @@
       <ul style="margin: 0;padding: 0;">
         <li class="categoryLi" v-for="item,index in swaggerCategory" @click="countTo=index"
             :style="{backgroundColor:bg[item.name.toUpperCase()]}">
-          <!--:style="{backgroundColor:bg[item[1].toUpperCase()]}"-->
-          <!--<span class="categoryLi-type">{{key?key.toUpperCase():""}}</span>-->
           <span class="categoryLi-type">{{item.name ? item.name.toUpperCase() : ""}}</span>
           <code class="categoryLi-path">{{item.pathName ? item.pathName.toLowerCase() : ""}}</code>
           <span class="categoryLi-name">{{item.pathInfo && item.pathInfo.summary ? item.pathInfo.summary : ""}}</span>
         </li>
       </ul>
     </div>
-    <interfaceMain v-on:PromptPopUpShow="PromptPopUpShow" v-bind:leftDropDownBoxContent="leftDropDownBoxContent"
-                   v-bind:bg="bg" v-bind:swaggerCategory="swaggerCategory" v-bind:countTo="countTo"></interfaceMain>
+     <interfaceMain v-on:PromptPopUpShow="PromptPopUpShow" v-bind:leftDropDownBoxContent="leftDropDownBoxContent"
+                    v-bind:bg="bg" v-bind:swaggerCategory="swaggerCategory" v-bind:countTo="countTo"></interfaceMain>
   </div>
 </template>
 <script type="text/ecmascript-6">
@@ -40,6 +37,22 @@
     name: 'app',
     data() {
       return {
+        indentation: 1,
+        testObject: {
+          "test1": "wx9fdb8ble7ce3c68f",
+          "test2": "123456789",
+          "testData1": {
+            "testdatason1": "97895455",
+            "testdatason2": 3,
+            "testData222": [
+              {
+                "testdatason4": "wosh",
+                "testdatason5": "shijie"
+              }
+            ]
+          },
+          "testData2": [{"a": 23}]
+        },
         selected: 0,
         count: 0,
         countTo: 0,
@@ -136,7 +149,7 @@
     border-left: 5px solid #fff;
     cursor: pointer;
     text-align: left;
-    padding:16px 0 16px 5%;
+    padding: 16px 0 16px 5%;
   }
 
   .nav-list > li:hover, .nav-list > li.active {
@@ -144,8 +157,6 @@
     color: #8ABF00;
     border-left: 5px solid #8ABF00;
   }
-
-
 
   /* 第一层接口列表名字 */
   .navList-name {
@@ -196,7 +207,8 @@
     height: 20px;
     line-height: 20px;
   }
-  .categoryLi .categoryLi-path{
+
+  .categoryLi .categoryLi-path {
     padding: 2px 4px;
     font-size: 90%;
     color: #c7254e;
@@ -204,11 +216,13 @@
     background-color: #f9f2f4;
     border-radius: 4px;
   }
+
   .categoryLi .categoryLi-name {
     display: block;
     height: 20px;
     line-height: 20px;
   }
+
   .notify .notify-msg {
     height: auto;
     max-width: 260px;

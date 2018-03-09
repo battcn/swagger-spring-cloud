@@ -52,7 +52,12 @@
           </div>
         </li>
         <li><span>响应Model</span>
-          <div class="jsonData"><span>无</span></div>
+          <div v-if="typeof jsonObject=='array'||typeof jsonObject=='object' " >
+            <ul  v-for="(item,key) in jsonObject">
+              <Json-View v-bind:obj="item" :keyTo="key" v-bind:indentation="indentation"></Json-View>
+            </ul>
+          </div>
+          <div v-else >无</div>
         </li>
         <li><span>响应参数说明</span>
           <div class="ResponseParameter">
@@ -123,11 +128,12 @@
   import FormFold from './formFold.vue'
   import {deepCopy,basicTypeInit} from './../util/util'
   import SubmitForm from './submitForm.vue'
+  import JsonView from './jsonView.vue'
 
   export default {
     name: "app",
     data() {
-      return {s:false,switchA: 0, resultShow: false, debugging: 'content',  curlMode: "" ,linkageSection:"",parameterValue: {}}
+      return {indentation: 1,jsonObject:"",s:false,switchA: 0, resultShow: false, debugging: 'content',  curlMode: "" ,linkageSection:"",parameterValue: {}}
     },
     computed: {
       InterfaceResponse: function () {/* 响应参数 */
@@ -160,13 +166,12 @@
                 }
               }
               deftion = this.JSONinit(refType);
-              $('.jsonData').JSONView(deftion);
+              this.jsonObject=deftion;
               return definition;
             } else {
               //未发现ref属性
               if (schema.hasOwnProperty("type")) {
-                $('.jsonData').html("")
-                $('.jsonData').html(schema["type"])
+                this.jsonObject=schema["type"];
                 return schema["type"];
               }
               return "无";
@@ -501,7 +506,7 @@
       ...mapMutations(['send']),
     },
     props: ['swaggerCategory', 'countTo', 'bg', 'leftDropDownBoxContent'],
-    components: {FormFold,SubmitForm}
+    components: {FormFold,SubmitForm,JsonView}
   }
 </script>
 <style>
@@ -636,8 +641,6 @@
     width: 15%;
     float: left;
     padding: 8px 4px;
-    /*padding-bottom: 1000px;*/
-    /*margin-bottom: -1000px;*/
     text-align: left;
   }
 

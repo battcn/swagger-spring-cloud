@@ -1,7 +1,6 @@
 <template>
   <div id="app">
     <list></list>
-    <!--<interfaceMain></interfaceMain>-->
   </div>
 </template>
 
@@ -9,10 +8,9 @@
 <script type="text/ecmascript-6">
   import 'normalize.css'
   import list from './page/interfaceList.vue'
-  import interfaceMain from './page/interfaceMain.vue';
   export default {
     name: 'app',
-    components: {list, interfaceMain}
+    components: {list}
   }
 </script>
 
