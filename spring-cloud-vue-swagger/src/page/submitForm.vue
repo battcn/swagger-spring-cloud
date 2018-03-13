@@ -1,99 +1,174 @@
-<template>
-  <div class="content-parameter"
-       v-if="swaggerCategory[countTo]&&swaggerCategory[countTo].pathInfo&&swaggerCategory[countTo].pathInfo.parameters">
-    <ul>
-      <li class="parameter-head">
-        <input :checked="isSelectAll(copyInterfaceRequest)||selectAll" style="margin-top:10px;" type="checkbox" @click="selectAll=!selectAll"/>
-        <span>参数名称</span>
-        <span style="border-right: 7px solid transparent;">参数值</span>
-        <span>操作</span>
-      </li>
-      <li class="parameter-content" v-for="(item,key) in copyInterfaceRequest">
-        <input style="margin-top:10px;"  class="parameter-checkbox" type="checkbox"
-               :disabled="item.required"   :checked="item.required||selectAll" />
-        <input :value="item.name" class="parameter-name" type="text" />
-        <div class="parameter-value">
-              <textarea rows="10" v-if="parameterValue[key]!=''&&(typeof parameterValue[key])=='object'"
+<template xmlns:v-bind="http://www.w3.org/1999/xhtml" xmlns:v-model="http://www.w3.org/1999/xhtml">
+  <div>
+    <div class="content-url">
+        <span
+          :style="{backgroundColor:bg[swaggerCategory&&swaggerCategory[countTo]&&swaggerCategory[countTo].name.toUpperCase()]}">{{swaggerCategory[countTo] && swaggerCategory[countTo].name ? swaggerCategory[countTo].name.toUpperCase() : ""}}</span>
+      <div>
+        <input v-if="(typeof linkagePath)=='string'" v-bind:value="linkagePath"
+               style="width:100%;height: 23px;line-height: 23px;" type="text"/>
+        <input v-else v-model:value="linkagePath"
+               style="width:100%;height: 23px;line-height: 23px;" type="text"/>
+      </div>
+      <button type="submit" @click="formCollection">发送</button>
+    </div>
+    <div class="content-parameter"
+         v-if="swaggerCategory[countTo]&&swaggerCategory[countTo].pathInfo&&swaggerCategory[countTo].pathInfo.parameters">
+      <ul>
+        <li class="parameter-head">
+          <input  :checked="isSelectAll" style="margin-top:10px;" type="checkbox"
+                 @click="selectAll=!selectAll"/>
+          <span>参数名称</span>
+          <span style="border-right: 7px solid transparent;">参数值</span>
+          <span>操作</span>
+        </li>
+        <li  v-for="(item,key) in copyChildForm">
+          <input style="margin-top:10px;" class="parameter-checkbox" type="checkbox"
+                 :disabled="childForm[key].required" v-model="item.required" :checked="item.required||selectAll"/>
+          <input :value="item.name" class="parameter-name" type="text"/>
+          <div class="parameter-value">
+              <textarea rows="10" v-if="copyChildForm[key].default!=''&&(typeof copyChildForm[key].default)=='object'"
                         style="height:auto;width:100%;color: #858585;padding: 5px 9px;"
-                        type="text">{{parameterValue[key]}}</textarea>
-          <!--<input v-else v-model="parameterValue[key]"  type="text" style="width:100%;margin-top: 8px;"/>-->
-          <input v-else-if="linkageSection==item.name" @change="update(key,parameterValue[key])"   v-model="parameterValue[key]"  type="text" style="width:100%;margin-top: 8px;"/>
-          <input v-else  v-model="parameterValue[key]"  type="text" style="width:100%;margin-top: 8px;"/>
+                        type="text">{{copyChildForm[key].default}}</textarea>
+            <input v-else-if="linkageSection==item.name"
+                   v-model="keyValue" type="text" style="width:100%;margin-top: 8px;"/>
+            <input v-else v-model="copyChildForm[key].default" type="text" style="width:100%;margin-top: 8px;"/>
 
-        </div>
-        <span v-if="parameterValue[key]==''||(typeof parameterValue[key])!='object'"
-              class="parameter-operating" @click="deleteInterfaceRequest(key,item)">删除</span>
-      </li>
-    </ul>
+          </div>
+          <span v-if="copyChildForm[key].default==''||(typeof copyChildForm[key].default)!='object'"
+                class="parameter-operating" @click="deleteInterfaceRequest(key,item)">删除</span>
+        </li>
+      </ul>
+    </div>
   </div>
-
 </template>
 <script>
-  import {deepCopy,basicTypeInit} from './../util/util'
+  import {deepCopy, basicTypeInit} from './../util/util'
   export default {
-    name:"submit-form",
-    data () {
-      return {selectAll:false,a:0}
+    name: "submit-form",
+    data() {
+      return {keyValue:'',selectAll: false, a: 0, linkageSection: "", s: false}
     },
-    props:['swaggerCategory','linkageSection','leftDropDownBoxContent','countTo','InterfaceRequest','parameterValue'],
-    computed:{
-      copyInterfaceRequest:function(){
-          return deepCopy(this.InterfaceRequest);
-      },
-      /*parameterValue: function () {
-        let resultCopy= deepCopy(this.InterfaceRequest);
-        let parameterValue={};
-        for(let key in resultCopy){
-          /!* 如果该字段没有type属性且存在子字段，子字段内有类型type属性 *!/
-          if((!resultCopy[key].type&&resultCopy[key].properties&&resultCopy[key].properties.type=="object")||resultCopy[key].type=='array'&&resultCopy[key].properties){
-            /!* 包含子字段 *!/
-            if(resultCopy[key].type=='array'&&resultCopy[key].properties){
-              parameterValue[key]=[];
-              parameterValue[key].push(this.$parent.iniObject(resultCopy[key].properties.properties))
-            }else{
-              parameterValue[key]={}
-              parameterValue[key]=this.$parent.iniObject(resultCopy[key].properties.properties);
+    props: ['childForm', 'bg', 'swaggerCategory', 'leftDropDownBoxContent', 'countTo', 'InterfaceRequest', 'parameterValue'],
+    computed: {
+      linkagePath() {
+        let path = (this.swaggerCategory && this.swaggerCategory[this.countTo] && this.swaggerCategory[this.countTo].pathName) ? this.swaggerCategory[this.countTo].pathName : "";
+        let digits = path.indexOf("{");
+        let digitsEnd = path.indexOf("}");
+        if (path !== undefined && digits > 0) { //判断是否有参数在PATH路径上
+          let linkageNoun = path.slice(digits + 1, digitsEnd);
+          this.linkageSection = path.slice(digits + 1, digitsEnd);
+          for (let key in this.copyChildForm) {
+            if (this.copyChildForm[key].name === this.linkageSection) {
+              return path.replace(this.linkageSection,this.keyValue);
             }
-          }else{
-            /!* 不包含子字段 *!/
-            parameterValue[key]=basicTypeInit(resultCopy[key].type);
           }
         }
-        return parameterValue;
-      }*/
-    },
-    methods:{
-      update:function (key,item) {
-        this.parameterValue[key]=item;
-        this.$emit('shijian',item);
+        return path;
       },
-      PromptPopUpShow: function (hint) {
-          this.$layer.msg(hint, {time: 2})
+      copyChildForm(){
+        return deepCopy(this.childForm);
       },
-      deleteInterfaceRequest:function (key,item) {
-        if(this.copyInterfaceRequest&&this.copyInterfaceRequest[key]){
-          if(item.required){
-            this.PromptPopUpShow(item.name+"为必选字段");
+      copyInterfaceRequest() {
+        return deepCopy(this.InterfaceRequest);
+      },
+      isSelectAll: function () {
+        for (let key in this.copyChildForm) {
+          if (!this.copyChildForm[key].required) { //如果存在一个为不勾选，则不勾选全选
             return false;
           }
-          this.$delete(this.copyInterfaceRequest,key);
-          this.selectAll=!this.selectAll;
-          this.selectAll=!this.selectAll;
         }
+        return true;
       },
-      isSelectAll:function (InterfaceRequest) {
-        let is=true;
-        for(let key in InterfaceRequest){
-          if(!InterfaceRequest[key].required){
-            is=false
+    },
+    methods: {
+      formCollection: function () { //收集表单信息
+        for (let key in this.copyChildForm) {
+          let digits = this.linkagePath.indexOf("{");
+          let digitsEnd = this.linkagePath.indexOf("}");
+          if(digits>0&&digitsEnd>0){//路径中有参数
+            for (let key in this.copyChildForm) {
+              if (this.copyChildForm[key].name === this.linkageSection) {
+                this.copyChildForm[key].default=this.keyValue;
+              }
+            }
+            this.$emit('getCollection',this.copyChildForm);
+          }else{
+            this.$emit('getCollection',this.copyChildForm);
           }
         }
-        this.s=is;
       },
+      PromptPopUpShow: function (hint) {
+        this.$layer.msg(hint, {time: 2})
+      },
+      deleteInterfaceRequest: function (key, item) {
+        if (this.copyInterfaceRequest && this.copyInterfaceRequest[key]) {
+          if (item.required) {
+            this.PromptPopUpShow(item.name + "为必选字段");
+            return false;
+          }
+          this.$delete(this.copyInterfaceRequest, key);
+          this.selectAll = !this.selectAll;
+          this.selectAll = !this.selectAll;
+        }
+      },
+
     }
+
   }
 </script>
 <style>
+  /* 调试页面 */
+  .content-url {
+    overflow: hidden;
+    height: 35px;
+    margin-bottom: 10px;
+    position: relative;
+  }
+
+  .content-url > span {
+    width: 80px;
+    color: #fff;
+    text-align: center;
+    height: 100%;
+    line-height: 35px;
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+
+  .content-url > div {
+    display: block;
+    margin-left: 80px;
+    margin-right: 88px;
+    height: 35px;
+  }
+
+  .content-url > div input {
+    color: #858585;
+    background-color: #fff;
+    border: 1px solid #d5d5d5;
+    padding: 5px 4px;
+    line-height: 1.2;
+    font-size: 14px;
+    font-family: inherit;
+  }
+
+  .content-url > button {
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 35px;
+    background: #40A8FF;
+    padding: 0 23px;
+    border: 0;
+    color: #fff;
+  }
+
+  .content-url > button:active {
+    background-color: #1b6aaa !important;
+    border-color: #428bca;
+  }
+
   /* 调试：附带参数列表 */
   .content-parameter {
     margin-bottom: 45px;

@@ -52,12 +52,12 @@
           </div>
         </li>
         <li><span>响应Model</span>
-          <div v-if="typeof jsonObject=='array'||typeof jsonObject=='object' " >
-            <ul  v-for="(item,key) in jsonObject">
+          <div v-if="typeof jsonObject=='array'||typeof jsonObject=='object' ">
+            <ul v-for="(item,key) in jsonObject">
               <Json-View v-bind:obj="item" :keyTo="key" v-bind:indentation="indentation"></Json-View>
             </ul>
           </div>
-          <div v-else >无</div>
+          <div v-else>无</div>
         </li>
         <li><span>响应参数说明</span>
           <div class="ResponseParameter">
@@ -75,19 +75,12 @@
       </ul>
     </div>
     <div v-show="switchA==1" class="debugging-content">
-      <div class="content-url">
-        <span
-          :style="{backgroundColor:bg[swaggerCategory&&swaggerCategory[countTo]&&swaggerCategory[countTo].name.toUpperCase()]}">{{swaggerCategory[countTo] && swaggerCategory[countTo].name ? swaggerCategory[countTo].name.toUpperCase() : ""}}</span>
-        <div>
-          <input v-if="(typeof linkagePath)=='string'"  v-bind:value="linkagePath"
-                 style="width:100%;height: 23px;line-height: 23px;" type="text" />
-          <input v-else v-bind:value="linkagePath[0]+parameterValue[0]+linkagePath[1]"
-            style="width:100%;height: 23px;line-height: 23px;" type="text" />
-        </div>
-        <button type="submit" @click="getForm">发送</button>
-      </div>
-        <submit-form v-on:shijian="fatherValue" :linkageSection="linkageSection" :parameterValue="parameterValue"  :leftDropDownBoxContent="leftDropDownBoxContent"  v-if="swaggerCategory[countTo]&&swaggerCategory[countTo].pathInfo&&swaggerCategory[countTo].pathInfo.parameters"  :swaggerCategory="swaggerCategory" :countTo="countTo" :InterfaceRequest="InterfaceRequest">
-        </submit-form>
+      <!-- 此处为接收 -->
+      <submit-form v-on:getCollection="getForm" :childForm="childForm" :bg="bg" v-on:shijian="fatherValue"
+                   :parameterValue="parameterValue" :leftDropDownBoxContent="leftDropDownBoxContent"
+                   v-if="swaggerCategory[countTo]&&swaggerCategory[countTo].pathInfo&&swaggerCategory[countTo].pathInfo.parameters"
+                   :swaggerCategory="swaggerCategory" :countTo="countTo" :InterfaceRequest="InterfaceRequest">
+      </submit-form>
       <div class="debugging-result" v-show="resultShow">
       <span style="cursor:pointer;" @click="debugging='content'"
             :class="[debugging=='content'?'active':'']">响应内容</span>
@@ -98,7 +91,12 @@
         <span style="cursor:pointer;" @click="debugging='curl'" :class="[debugging=='curl'?'active':'']">curl方式</span>
         <div class="result-content">
           <div class="content" v-show="debugging=='content'">
-            <li></li>
+            <div v-if="isJsonObject">
+              <ul v-for="(item,key) in jsonObjectTo">
+                <Json-View v-bind:obj="item" :keyTo="key" v-bind:indentation="indentation"></Json-View>
+              </ul>
+            </div>
+            <li v-else>{{jsonObjectTo}}</li>
           </div>
           <div v-show="debugging=='cookies'">
             <span>暂无</span>
@@ -126,14 +124,26 @@
 <script type="text/ecmascript-6">
   import {mapMutations} from 'vuex'
   import FormFold from './formFold.vue'
-  import {deepCopy,basicTypeInit} from './../util/util'
+  import {deepCopy, basicTypeInit} from './../util/util'
   import SubmitForm from './submitForm.vue'
   import JsonView from './jsonView.vue'
 
   export default {
     name: "app",
     data() {
-      return {indentation: 1,jsonObject:"",s:false,switchA: 0, resultShow: false, debugging: 'content',  curlMode: "" ,linkageSection:"",parameterValue: {}}
+      return {
+        isJsonObject: false,
+        childForm: {},
+        indentation: 1,
+        jsonObject: "",
+        jsonObjectTo: "",
+        switchA: 0,
+        resultShow: false,
+        debugging: 'content',
+        curlMode: "",
+        linkageSection: "",
+        parameterValue: {}
+      }
     },
     computed: {
       InterfaceResponse: function () {/* 响应参数 */
@@ -166,12 +176,12 @@
                 }
               }
               deftion = this.JSONinit(refType);
-              this.jsonObject=deftion;
+              this.jsonObject = deftion;
               return definition;
             } else {
               //未发现ref属性
               if (schema.hasOwnProperty("type")) {
-                this.jsonObject=schema["type"];
+                this.jsonObject = schema["type"];
                 return schema["type"];
               }
               return "无";
@@ -180,7 +190,7 @@
         }
       },
       InterfaceRequest: function () {
-        if(!this.swaggerCategory[this.countTo]&&this.swaggerCategory[this.countTo].pathInfo&&this.swaggerCategory[this.countTo].pathInfo.parameters){
+        if (!this.swaggerCategory[this.countTo] && this.swaggerCategory[this.countTo].pathInfo && this.swaggerCategory[this.countTo].pathInfo.parameters) {
           return false;
         }
         /* 请求参数的遍历 */
@@ -188,36 +198,46 @@
         let parameters = deepCopy(this.swaggerCategory[this.countTo].pathInfo.parameters);
         let definitions = deepCopy(this.leftDropDownBoxContent.definitions);
         for (let i in parameters) {
-          if ((parameters[i].schema && parameters[i].schema.$ref)||parameters[i].$ref) {
+          if ((parameters[i].schema && parameters[i].schema.$ref) || parameters[i].$ref) {
             result[i] = parameters[i];
-            result[i]['properties'] = this.formatRequest(parameters[i].schema.$ref||parameters[i].$ref);
+            result[i]['properties'] = this.formatRequest(parameters[i].schema.$ref || parameters[i].$ref);
           } else {
             result[i] = parameters[i];
           }
         }
-        let resultCopy= deepCopy(result);
-        for(let key in resultCopy){
+        let resultCopy = deepCopy(result);
+        for (let key in resultCopy) {
           /* 如果该字段没有type属性且存在子字段，子字段内有类型type属性 */
-          if((!resultCopy[key].type&&resultCopy[key].properties&&resultCopy[key].properties.type=="object")||resultCopy[key].type=='array'&&resultCopy[key].properties){
+          if ((!resultCopy[key].type && resultCopy[key].properties && resultCopy[key].properties.type == "object") || resultCopy[key].type == 'array' && resultCopy[key].properties) {
             /* 包含子字段 */
-            if(resultCopy[key].type=='array'&&resultCopy[key].properties){
-              this.parameterValue[key]=[];
+            if (resultCopy[key].type == 'array' && resultCopy[key].properties) {
+              this.parameterValue[key] = [];
               this.parameterValue[key].push(this.iniObject(resultCopy[key].properties.properties))
-            }else{
-              this.parameterValue[key]={}
-              this.parameterValue[key]=this.iniObject(resultCopy[key].properties.properties);
+            } else {
+              this.parameterValue[key] = {};
+              this.parameterValue[key] = this.iniObject(resultCopy[key].properties.properties);
             }
-          }else{
+          } else {
             /* 不包含子字段 */
-            this.parameterValue[key]=basicTypeInit(resultCopy[key].type);
+            this.parameterValue[key] = basicTypeInit(resultCopy[key].type);
           }
+        }
+        //提取数据传递给子数据
+        this.childForm = {};
+        for (let key in result) {
+          let array = {};
+          this.childForm[key] = {};
+          array['name'] = result && result[key] && result[key]['name'];
+          array['default'] = this.parameterValue[key];
+          array['required'] = result && result[key] && result[key]['required'];
+          this.childForm[key] = array;
         }
         return result;
       },
       debugResponse() {/* 从请求中获取到的响应参数 */
         return this.$store.state.debugRequest.debugResponse;
       },
-      linkagePath(){
+      /*linkagePath(){
         let path=(this.swaggerCategory&&this.swaggerCategory[this.countTo]&&this.swaggerCategory[this.countTo].pathName)?this.swaggerCategory[this.countTo].pathName:"";
         let digits=path.indexOf("{")
         let digitsEnd=path.indexOf("}")
@@ -227,7 +247,7 @@
           return [path.slice(0,digits+1),path.slice(digitsEnd)] ;
         }
         return path;
-      }
+      }*/
     },
     watch: {
       countTo: function () {
@@ -236,42 +256,33 @@
       }
     },
     methods: {
-      fatherValue:function (myValue) {
-        this.$set(this.parameterValue,0,myValue);
-        this.resultShow=!this.resultShow;
-        this.resultShow=!this.resultShow;
+      fatherValue: function (myValue) {
+        this.$set(this.parameterValue, 0, myValue);
+        this.resultShow = !this.resultShow;
+        this.resultShow = !this.resultShow;
       },
-     /* isSelectAll:function (InterfaceRequest) {
-       let is=true;
-          for(let key in InterfaceRequest){
-            if(!InterfaceRequest[key].required){
-              is=false
-            }
-        }
-        this.s=is;
-      },*/
-      tickRequired:function (item,event) {
-        for(let key in this.InterfaceRequest){
-          if(!this.InterfaceRequest[key].required){
+      tickRequired: function (item, event) {
+        for (let key in this.InterfaceRequest) {
+          if (!this.InterfaceRequest[key].required) {
             return false;
           }
         }
         return true;
       },
-      iniObject:function (properties) {/* 传入对象，对其进行类型初始化 */
-        let obj={}
-        for(let key in properties){
-          if((properties[key].type&&properties[key].properties&&properties[key].type=="object")||(properties[key].type=='array'&&properties[key].properties)){
+      iniObject: function (properties) {/* 传入对象，对其进行类型初始化 */
+        let obj = {}
+        for (let key in properties) {
+          if ((properties[key].type && properties[key].properties && properties[key].type == "object") || (properties[key].type == 'array' && properties[key].properties)) {
             /* 包含子字段 */
-            if(properties[key].type=='array'&&properties[key].properties){
-              obj[key]={};
-              obj[key]=(Object.values(this.iniObject(properties[key].properties)))
-            }else{
-              obj[key]=this.iniObject(properties[key].properties)
+            if (properties[key].type == 'array' && properties[key].properties) {
+              obj[key] = {};
+              obj[key] = (Object.values(this.iniObject(properties[key].properties)))
+            } else {
+              obj[key] = this.iniObject(properties[key].properties)
             }
-          }else{
+          } else {
             /* 不包含子字段 */
-            obj[key]=basicTypeInit(properties[key].type)
+            obj[key] = basicTypeInit(properties[key].type)
           }
         }
         return obj;
@@ -306,21 +317,21 @@
         let definitions = deepCopy(this.leftDropDownBoxContent.definitions);
         for (let key in definitions) {
           if (key.toLowerCase() == objName.toLowerCase()) {
-            result =deepCopy(definitions[key]);
-            let properties = definitions[key].properties
+            result = deepCopy(definitions[key]);
+            let properties = definitions[key].properties;
             for (let k in properties) {
               if ((properties[k].items && properties[k].items.$ref) || properties[k].$ref) {
-                let Ref=(properties[k].items && properties[k].items.$ref)?(properties[k].items && properties[k].items.$ref):properties[k].$ref
-                if(properties[k].type == 'array'){
-                  result.properties[k].properties=[];
-                  let adds=this.formatRequest(Ref);
-                  adds.name?"":adds['name']=Ref.match("#/definitions/(.*)")[1].toLowerCase();
+                let Ref = (properties[k].items && properties[k].items.$ref) ? (properties[k].items && properties[k].items.$ref) : properties[k].$ref
+                if (properties[k].type == 'array') {
+                  result.properties[k].properties = [];
+                  let adds = this.formatRequest(Ref);
+                  adds.name ? "" : adds['name'] = Ref.match("#/definitions/(.*)")[1].toLowerCase();
                   result.properties[k].properties.push(adds);
                   continue;
                 }
-              //  result.properties[k].properties={};
-               // result.properties[k].properties[Ref.match("#/definitions/(.*)")[1].toLowerCase()]=this.formatRequest(Ref);
-                result.properties[k]=this.formatRequest(Ref);
+                //  result.properties[k].properties={};
+                // result.properties[k].properties[Ref.match("#/definitions/(.*)")[1].toLowerCase()]=this.formatRequest(Ref);
+                result.properties[k] = this.formatRequest(Ref);
               } else {
                 result.properties[k] = properties[k];
               }
@@ -389,27 +400,15 @@
         }
         return deftion;
       },
-      getForm: function (e) {
-        e.preventDefault();
-        var _this = this;
-        var result = [];
-        var parameterContent = document.getElementsByClassName("parameter-content");
-        for (var i = 0, n = parameterContent.length; i < n; i++) {
-          var option = parameterContent[i].children[0];
-          if (this.swaggerCategory[this.countTo].pathInfo.parameters[i].required == true && !parameterContent[i].children[0].checked) {
-            _this.$emit('PromptPopUpShow', parameterContent[i].children[1].value + "为必选字段")
-            return false;
-          }
-          let inputEle = $(parameterContent[i].children[2]).find("textarea")[0] ? $(parameterContent[i].children[2]).find("textarea") : $(parameterContent[i].children[2]).find("input")
-          if (option.checked) {
-            if (inputEle.val().trim().length == 0) {
-              _this.$emit('PromptPopUpShow', parameterContent[i].children[1].value + "不能为空")
-              return false;
-            }
-            var obj = [];
-            obj.push(parameterContent[i].children[1].value);
-            obj.push(inputEle[0].type == 'text' ? inputEle.val() : JSON.parse(inputEle.val()))
-            obj.push(_this.swaggerCategory[_this.countTo].pathInfo.parameters[i])
+      getForm: function (data) {
+        let _this = this;
+        let result = [];
+        for (let key in data) {
+          if (data[key].required) {
+            let obj = [];
+            obj.push(data[key].name);
+            obj.push(data[key].default);
+            obj.push(_this.swaggerCategory[_this.countTo].pathInfo.parameters[key]);
             result.push(obj);
           }
         }
@@ -427,14 +426,13 @@
             url = _this.leftDropDownBoxContent.basePath + url;
           }
         }
-        let isQuery=false;
+        let isQuery = false;
         for (let i = 0, n = result.length; i < n; i++) {
           if (result[i][2]["in"] === "path") {
-            //url += "/" + result[i][1];
             url = url.replace("{" + result[i][0] + "}", result[i][1]);
-          } else if(result[i][2]["in"] ==="query"){
-            url+=((isQuery?'&':isQuery=true&&'?')+result[i][0]+'='+result[i][1]);
-          } else{
+          } else if (result[i][2]["in"] === "query") {
+            url += ((isQuery ? '&' : isQuery = true && '?') + result[i][0] + '=' + result[i][1]);
+          } else {
             if (result[i][2]["in"] === "body") {
               bodyparams += JSON.stringify(result[i][1]);
             } else {
@@ -446,7 +444,7 @@
             }
           }
         }
-        for(let j = 0, k = result.length; j < k; j++){
+        for (let j = 0, k = result.length; j < k; j++) {
           if (result && result[j] && result[j][2] && result[j][2]["in"] && result[j][2]["in"] === "body") {
             reqdata = bodyparams;
             break;
@@ -464,7 +462,6 @@
             _this.StitchingCurl(headerParams, jsonReqdata)
           }
         });
-        // this.debugResponse=this.$store.state.debugRequest.data;
       },
       StitchingCurl: function (headerParams, reqdata) {
         let _this = this;
@@ -480,33 +477,36 @@
         let contentType = " --header \'Content-Type:  " + _this.debugResponse.headers['map']['content-type'][0] + "\' "
         if (_this.swaggerCategory[this.countTo].name.toLowerCase() == 'get') {
           let curltable = ("curl -X " + _this.swaggerCategory[this.countTo].name.toUpperCase() +
-          " --header \'Accept:  " + _this.debugResponse.headers['map']['content-type'][0] + "\' " +
-          headerss + contentUrl);
+            " --header \'Accept:  " + _this.debugResponse.headers['map']['content-type'][0] + "\' " +
+            headerss + contentUrl);
           _this.curlMode = curltable;
         } else {
           /* d data 非头部附带数据,只用于非get类型请求 */
-          let curlData = " -d \'" + (reqdata?this.formatterJson(reqdata).replace(/[\r\n]/g," \\\n"):"")  + "\' ";
-          let curltable = ("curl -X " + _this.swaggerCategory[this.countTo].name.toUpperCase()  + contentType + curlAccept + headerss + (reqdata == '{}' ? "" : curlData) + contentUrl);
+          let curlData = " -d \'" + (reqdata ? this.formatterJson(reqdata).replace(/[\r\n]/g, " \\\n") : "") + "\' ";
+          let curltable = ("curl -X " + _this.swaggerCategory[this.countTo].name.toUpperCase() + contentType + curlAccept + headerss + (reqdata == '{}' ? "" : curlData) + contentUrl);
           _this.curlMode = curltable;
         }
         /* 响应内容JSON序列化 */
-          try {
-            let obj=JSON.parse(this.debugResponse.bodyText);
-            if(typeof obj == 'object' && obj ){
-              $(".result-content .content li").JSONView(new String(this.debugResponse.bodyText))
-            }else{
-              $(".result-content .content li").html(this.debugResponse.bodyText)
-            }
-          } catch(e) {
-            $(".result-content .content li").html(this.debugResponse.bodyText)
+        try {
+          let obj = JSON.parse(this.debugResponse.bodyText);
+          if (typeof obj == 'object' && obj) {
+            this.isJsonObject = true;
+            this.jsonObjectTo = obj;
+          } else {
+            this.isJsonObject = false;
+            this.jsonObjectTo= new String(this.debugResponse.bodyText);
           }
+        } catch (e) {
+          this.isJsonObject = false;
+          this.jsonObjectTo= new String(this.debugResponse.bodyText);
+        }
         this.resultShow = true;
         /* 显示结果 */
       },
       ...mapMutations(['send']),
     },
     props: ['swaggerCategory', 'countTo', 'bg', 'leftDropDownBoxContent'],
-    components: {FormFold,SubmitForm,JsonView}
+    components: {FormFold, SubmitForm, JsonView}
   }
 </script>
 <style>
@@ -650,8 +650,7 @@
 
   /* 调试：附带参数列表 */
 
-
-  /* 调试页面 */
+  /*!* 调试页面 *!
   .content-url {
     overflow: hidden;
     height: 35px;
@@ -702,7 +701,7 @@
     background-color: #1b6aaa !important;
     border-color: #428bca;
   }
-
+*/
   /* 接口详细信息列表 */
   .swagger-content, .debugging-content {
     border-top: 1px solid #dbdbdb;
