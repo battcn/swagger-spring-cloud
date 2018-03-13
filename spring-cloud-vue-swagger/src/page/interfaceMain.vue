@@ -223,7 +223,7 @@
           }
         }
         //提取数据传递给子数据
-        this.childForm = {};
+        this.childForm = [];
         for (let key in result) {
           let array = {};
           this.childForm[key] = {};

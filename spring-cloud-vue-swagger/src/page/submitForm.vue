@@ -21,20 +21,20 @@
           <span style="border-right: 7px solid transparent;">参数值</span>
           <span>操作</span>
         </li>
-        <li  v-for="(item,key) in copyChildForm">
+        <li  v-for="(item,key) in childForm">
           <input style="margin-top:10px;" class="parameter-checkbox" type="checkbox"
                  :disabled="childForm[key].required" v-model="item.required" :checked="item.required||selectAll"/>
           <input :value="item.name" class="parameter-name" type="text"/>
           <div class="parameter-value">
-              <textarea rows="10" v-if="copyChildForm[key].default!=''&&(typeof copyChildForm[key].default)=='object'"
+              <textarea rows="10" v-if="childForm[key].default!=''&&(typeof childForm[key].default)=='object'"
                         style="height:auto;width:100%;color: #858585;padding: 5px 9px;"
-                        type="text">{{copyChildForm[key].default}}</textarea>
+                        type="text">{{childForm[key].default}}</textarea>
             <input v-else-if="linkageSection==item.name"
                    v-model="keyValue" type="text" style="width:100%;margin-top: 8px;"/>
-            <input v-else v-model="copyChildForm[key].default" type="text" style="width:100%;margin-top: 8px;"/>
+            <input v-else v-model="childForm[key].default" type="text" style="width:100%;margin-top: 8px;"/>
 
           </div>
-          <span v-if="copyChildForm[key].default==''||(typeof copyChildForm[key].default)!='object'"
+          <span v-if="childForm[key].default==''||(typeof childForm[key].default)!='object'"
                 class="parameter-operating" @click="deleteInterfaceRequest(key,item)">删除</span>
         </li>
       </ul>
@@ -57,8 +57,8 @@
         if (path !== undefined && digits > 0) { //判断是否有参数在PATH路径上
           let linkageNoun = path.slice(digits + 1, digitsEnd);
           this.linkageSection = path.slice(digits + 1, digitsEnd);
-          for (let key in this.copyChildForm) {
-            if (this.copyChildForm[key].name === this.linkageSection) {
+          for (let key in this.childForm) {
+            if (this.childForm[key].name === this.linkageSection) {
               return path.replace(this.linkageSection,this.keyValue);
             }
           }
@@ -72,8 +72,8 @@
         return deepCopy(this.InterfaceRequest);
       },
       isSelectAll: function () {
-        for (let key in this.copyChildForm) {
-          if (!this.copyChildForm[key].required) { //如果存在一个为不勾选，则不勾选全选
+        for (let key in this.childForm) {
+          if (!this.childForm[key].required) { //如果存在一个为不勾选，则不勾选全选
             return false;
           }
         }
@@ -82,18 +82,18 @@
     },
     methods: {
       formCollection: function () { //收集表单信息
-        for (let key in this.copyChildForm) {
+        for (let key in this.childForm) {
           let digits = this.linkagePath.indexOf("{");
           let digitsEnd = this.linkagePath.indexOf("}");
           if(digits>0&&digitsEnd>0){//路径中有参数
-            for (let key in this.copyChildForm) {
-              if (this.copyChildForm[key].name === this.linkageSection) {
-                this.copyChildForm[key].default=this.keyValue;
+            for (let key in this.childForm) {
+              if (this.childForm[key].name === this.linkageSection) {
+                this.childForm[key].default=this.keyValue;
               }
             }
-            this.$emit('getCollection',this.copyChildForm);
+            this.$emit('getCollection',this.childForm);
           }else{
-            this.$emit('getCollection',this.copyChildForm);
+            this.$emit('getCollection',this.childForm);
           }
         }
       },

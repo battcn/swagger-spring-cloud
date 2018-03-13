@@ -1,8 +1,15 @@
 /* 对象拷贝 */
 const deepCopy=function(source){
-  var result = {};
-  for (var key in source) {
-    result[key] = (typeof source[key] === 'object') ? deepCopy(source[key]) : source[key];
+  let result={};
+  //typeof source === 'object'?(Array==source.constructor ?result = []:result = {}):result = {};
+  for (let key in source) {
+    /*  // typeof source[key] === 'object'? result = {}:((typeof source[key] === 'array')?result = []:result = {});
+      if(typeof source === 'object'&&source[key]&&source[key]['constructor']&&source[key].constructor == Array){
+        result[key]=[];
+        result[key].push(deepCopy(source[key]));
+        continue;
+      }*/
+    result[key] = (typeof source[key] === 'object') ? deepCopy(source[key]):source[key];
   }
   return result;
 }
