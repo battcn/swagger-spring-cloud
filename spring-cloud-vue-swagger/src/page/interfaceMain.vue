@@ -76,9 +76,9 @@
     </div>
     <div v-show="switchA==1" class="debugging-content">
       <!-- 此处为接收 -->
-      <submit-form v-on:getCollection="getForm" :childForm="childForm" :bg="bg" v-on:shijian="fatherValue"
+      <submit-form v-on:deleteCopyChildForm="deleteChildForm" v-on:getCollection="getForm" :childForm="childForm" :bg="bg" v-on:shijian="fatherValue"
                    :parameterValue="parameterValue" :leftDropDownBoxContent="leftDropDownBoxContent"
-                   v-if="swaggerCategory[countTo]&&swaggerCategory[countTo].pathInfo&&swaggerCategory[countTo].pathInfo.parameters"
+                   v-if="swaggerCategory[countTo]&&swaggerCategory[countTo].pathInfo"
                    :swaggerCategory="swaggerCategory" :countTo="countTo" :InterfaceRequest="InterfaceRequest">
       </submit-form>
       <div class="debugging-result" v-show="resultShow">
@@ -256,6 +256,9 @@
       }
     },
     methods: {
+      deleteChildForm:function (key) {
+        this.$delete(this.childForm, key);
+      },
       fatherValue: function (myValue) {
         this.$set(this.parameterValue, 0, myValue);
         this.resultShow = !this.resultShow;
