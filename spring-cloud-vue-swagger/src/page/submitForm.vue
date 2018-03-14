@@ -46,10 +46,13 @@
   export default {
     name: "submit-form",
     data() {
-      return {keyValue:'',selectAll: false, a: 0, linkageSection: "", s: false}
+      return { keyValue: '', selectAll: false, a: 0, linkageSection: "", s: false}
     },
     props: ['childForm', 'bg', 'swaggerCategory', 'leftDropDownBoxContent', 'countTo', 'InterfaceRequest', 'parameterValue'],
     computed: {
+      copyChildForm(){
+        return deepCopy(this.childForm);
+      },
       linkagePath() {
         let path = (this.swaggerCategory && this.swaggerCategory[this.countTo] && this.swaggerCategory[this.countTo].pathName) ? this.swaggerCategory[this.countTo].pathName : "";
         let digits = path.indexOf("{");
@@ -59,14 +62,11 @@
           this.linkageSection = path.slice(digits + 1, digitsEnd);
           for (let key in this.copyChildForm) {
             if (this.copyChildForm[key].name === this.linkageSection) {
-              return path.replace(this.linkageSection,this.keyValue);
+              return path.replace(this.linkageSection, this.keyValue);
             }
           }
         }
         return path;
-      },
-      copyChildForm(){
-        return deepCopy(this.childForm);
       },
       copyInterfaceRequest() {
         return deepCopy(this.InterfaceRequest);
@@ -81,45 +81,43 @@
       },
     },
     methods: {
-      oninput(val,key){
+      oninput(val, key) {
         try {
           this.copyChildForm[key].default = JSON.parse(val);
-        }catch(e){
-          this.copyChildForm[key].default=val;
+        } catch (e) {
+          this.copyChildForm[key].default = val;
         }
       },
       formCollection: function () { //收集表单信息
         for (let key in this.copyChildForm) {
           let digits = this.linkagePath.indexOf("{");
           let digitsEnd = this.linkagePath.indexOf("}");
-          if(digits>0&&digitsEnd>0){//路径中有参数
+          if (digits > 0 && digitsEnd > 0) {//路径中有参数
             for (let key in this.copyChildForm) {
               if (this.copyChildForm[key].name === this.linkageSection) {
-                this.copyChildForm[key].default=this.keyValue;
+                this.copyChildForm[key].default = this.keyValue;
               }
             }
-            this.$emit('getCollection',this.copyChildForm);
-          }else{
-            this.$emit('getCollection',this.copyChildForm);
+            this.$emit('getCollection', this.copyChildForm);
+          } else {
+            this.$emit('getCollection', this.copyChildForm);
           }
         }
-        this.$emit('getCollection',this.copyChildForm);
+        this.$emit('getCollection', this.copyChildForm);
       },
       PromptPopUpShow: function (hint) {
         this.$layer.msg(hint, {time: 2})
       },
       deleteInterfaceRequest: function (key, item) {
-        if (this.copyInterfaceRequest && this.copyInterfaceRequest[key]) {
           if (item.required) {
             this.PromptPopUpShow(item.name + "为必选字段");
             return false;
           }
-          this.$emit('deleteCopyChildForm',key);
-        }
-      },
-
-    }
-
+        this.copyChildForm.splice(key,1);
+        this.selectAll = !this.selectAll;
+        this.selectAll = !this.selectAll;
+      }
+    },
   }
 </script>
 <style>
@@ -221,7 +219,6 @@
 
   /* 表格中的文字样式 */
   .content-parameter li > span {
-    width: 20%;
     text-align: left;
     line-height: 40px;
     float: left;

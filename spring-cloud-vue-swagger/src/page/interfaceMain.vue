@@ -76,7 +76,7 @@
     </div>
     <div v-show="switchA==1" class="debugging-content">
       <!-- 此处为接收 -->
-      <submit-form v-on:deleteCopyChildForm="deleteChildForm" v-on:getCollection="getForm" :childForm="childForm" :bg="bg" v-on:shijian="fatherValue"
+      <submit-form v-on:deleteCopyChildForm="deleteChildForm" v-on:getCollection="getForm" :childForm.sync="childForm" :bg="bg" v-on:shijian="fatherValue"
                    :parameterValue="parameterValue" :leftDropDownBoxContent="leftDropDownBoxContent"
                    v-if="swaggerCategory[countTo]&&swaggerCategory[countTo].pathInfo"
                    :swaggerCategory="swaggerCategory" :countTo="countTo" :InterfaceRequest="InterfaceRequest">
@@ -230,7 +230,7 @@
           array['name'] = result && result[key] && result[key]['name'];
           array['default'] = this.parameterValue[key];
           array['required'] = result && result[key] && result[key]['required'];
-          this.childForm[key] = array;
+          this.childForm[key] = deepCopy(array);
         }
         return result;
       },
@@ -356,7 +356,7 @@
             break
           }
         }
-        for (var key in deftion) {
+        for (let key in deftion) {
           if (deftion[key].$ref && deftion[key].type == "array") {
             deftion[key] = {};
             continue;
